@@ -23,10 +23,25 @@ export default function TickerSearch({
 }: TickerSearchProps) {
   const [query, setQuery] = useState(defaultValue.toUpperCase());
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [prices, setPrices] = useState<Record<string, number | null>>({});
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(!!defaultValue);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function fetchPrices(symbols: string[]) {
+    if (symbols.length === 0) return;
+    try {
+      const res = await fetch(`/api/prices?tickers=${symbols.join(',')}`);
+      const data = await res.json() as Record<string, { price_usd: number }>;
+      const map: Record<string, number | null> = {};
+      for (const sym of symbols) {
+        const usd = data[sym]?.price_usd;
+        map[sym] = usd && usd > 0 ? usd : null;
+      }
+      setPrices(map);
+    } catch { /* stay at {} — all rows show "--" */ }
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -49,6 +64,7 @@ export default function TickerSearch({
 
     if (val.length < 2) {
       setResults([]);
+      setPrices({});
       setOpen(false);
       return;
     }
@@ -59,9 +75,12 @@ export default function TickerSearch({
         const data = await res.json() as { results: SearchResult[] };
         const list = data.results ?? [];
         setResults(list);
+        setPrices({});
         setOpen(list.length > 0);
+        if (list.length > 0) fetchPrices(list.map(r => r.displaySymbol));
       } catch {
         setResults([]);
+        setPrices({});
         setOpen(false);
       }
     }, 300);
@@ -124,6 +143,11 @@ export default function TickerSearch({
               </span>
               <span style={{ fontSize: 11, color: '#888888', flexShrink: 0, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
                 {typeLabel(r.type)}
+              </span>
+              <span style={{ fontSize: 12, color: '#e0e0e0', flexShrink: 0, fontFamily: 'var(--font-mono)', minWidth: 56, textAlign: 'right' }}>
+                {r.displaySymbol in prices
+                  ? (prices[r.displaySymbol] != null ? `$${prices[r.displaySymbol]!.toFixed(2)}` : '--')
+                  : '--'}
               </span>
             </div>
           ))}

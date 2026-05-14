@@ -2,27 +2,38 @@
 import { formatMxn } from '@/lib/calculations';
 
 interface SummaryBarProps {
-  totalValue: number;
+  positionsValue: number;
+  cashBalance: number;
   totalPnl: number;
   totalPnlPct: number;
   positions: number;
   alerts: number;
-  cashBalance?: number;
 }
 
-export default function SummaryBar({ totalValue, totalPnl, totalPnlPct, positions, alerts, cashBalance = 0 }: SummaryBarProps) {
+export default function SummaryBar({
+  positionsValue,
+  cashBalance,
+  totalPnl,
+  totalPnlPct,
+  positions,
+  alerts,
+}: SummaryBarProps) {
+  const grandTotal = positionsValue + cashBalance;
   const pnlPositive = totalPnl >= 0;
-  const totalWithCash = totalValue + cashBalance;
 
-  const stats = [
+  const breakdown = [
     {
-      label: 'Portfolio Value',
-      value: formatMxn(totalValue),
-      sub: cashBalance > 0 ? `Total incl. cash: ${formatMxn(totalWithCash)}` : undefined,
+      label: 'Positions Value',
+      value: formatMxn(positionsValue),
       color: 'var(--accent)',
     },
     {
-      label: 'Total P&L',
+      label: 'Cash Balance',
+      value: cashBalance > 0 ? formatMxn(cashBalance) : '—',
+      color: cashBalance > 0 ? 'var(--accent2)' : 'var(--muted)',
+    },
+    {
+      label: 'Unrealized P&L',
       value: `${pnlPositive ? '+' : ''}${formatMxn(totalPnl)}`,
       sub: `${pnlPositive ? '+' : ''}${totalPnlPct.toFixed(2)}%`,
       color: pnlPositive ? 'var(--accent2)' : 'var(--danger)',
@@ -40,30 +51,81 @@ export default function SummaryBar({ totalValue, totalPnl, totalPnlPct, position
   ];
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      borderBottom: '1px solid var(--border)',
-      background: 'var(--surface)',
-    }}>
-      {stats.map((s, i) => (
-        <div key={i} style={{
-          padding: '1rem 1.25rem',
-          borderRight: i < stats.length - 1 ? '1px solid var(--border)' : 'none',
+    <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+      {/* Grand total — headline */}
+      <div style={{
+        padding: '1.25rem 1.5rem 1rem',
+        borderBottom: '1px solid var(--border)',
+        background: 'linear-gradient(90deg, rgba(0,212,255,0.04) 0%, transparent 60%)',
+      }}>
+        <div style={{
+          fontFamily: 'Space Mono, monospace',
+          fontSize: '0.65rem',
+          color: 'var(--text-dim)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          marginBottom: '0.4rem',
         }}>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>
-            {s.label}
-          </div>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '1.1rem', color: s.color, fontWeight: 700 }}>
-            {s.value}
-          </div>
-          {s.sub && (
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', color: i === 0 ? 'var(--text-dim)' : s.color, marginTop: '0.15rem' }}>
-              {s.sub}
-            </div>
-          )}
+          Total Portfolio Value
         </div>
-      ))}
+        <div style={{
+          fontFamily: 'Space Mono, monospace',
+          fontSize: '2rem',
+          fontWeight: 700,
+          color: 'var(--accent)',
+          letterSpacing: '-0.02em',
+          lineHeight: 1,
+        }}>
+          {formatMxn(grandTotal)}
+        </div>
+        <div style={{
+          fontFamily: 'Space Mono, monospace',
+          fontSize: '0.7rem',
+          color: 'var(--text-dim)',
+          marginTop: '0.4rem',
+        }}>
+          {formatMxn(positionsValue)} positions &nbsp;+&nbsp; {cashBalance > 0 ? formatMxn(cashBalance) : '$0.00 MXN'} cash
+        </div>
+      </div>
+
+      {/* Breakdown stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
+        {breakdown.map((s, i) => (
+          <div key={i} style={{
+            padding: '0.75rem 1.25rem',
+            borderRight: i < breakdown.length - 1 ? '1px solid var(--border)' : 'none',
+          }}>
+            <div style={{
+              fontFamily: 'Space Mono, monospace',
+              fontSize: '0.6rem',
+              color: 'var(--text-dim)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: '0.3rem',
+            }}>
+              {s.label}
+            </div>
+            <div style={{
+              fontFamily: 'Space Mono, monospace',
+              fontSize: '0.9rem',
+              color: s.color,
+              fontWeight: 700,
+            }}>
+              {s.value}
+            </div>
+            {s.sub && (
+              <div style={{
+                fontFamily: 'Space Mono, monospace',
+                fontSize: '0.68rem',
+                color: s.color,
+                marginTop: '0.1rem',
+              }}>
+                {s.sub}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

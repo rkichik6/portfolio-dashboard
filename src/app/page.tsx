@@ -66,12 +66,12 @@ export default function DashboardPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <SummaryBar
-        totalValue={totalValue}
+        positionsValue={totalValue}
+        cashBalance={cashAmount}
         totalPnl={totalPnl}
         totalPnlPct={totalPnlPct}
         positions={holdings.length}
         alerts={alerts.length}
-        cashBalance={cashAmount}
       />
 
       {alerts.length > 0 && (

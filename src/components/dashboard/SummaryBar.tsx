@@ -7,15 +7,18 @@ interface SummaryBarProps {
   totalPnlPct: number;
   positions: number;
   alerts: number;
+  cashBalance?: number;
 }
 
-export default function SummaryBar({ totalValue, totalPnl, totalPnlPct, positions, alerts }: SummaryBarProps) {
+export default function SummaryBar({ totalValue, totalPnl, totalPnlPct, positions, alerts, cashBalance = 0 }: SummaryBarProps) {
   const pnlPositive = totalPnl >= 0;
+  const totalWithCash = totalValue + cashBalance;
 
   const stats = [
     {
       label: 'Portfolio Value',
       value: formatMxn(totalValue),
+      sub: cashBalance > 0 ? `Total incl. cash: ${formatMxn(totalWithCash)}` : undefined,
       color: 'var(--accent)',
     },
     {
@@ -55,7 +58,7 @@ export default function SummaryBar({ totalValue, totalPnl, totalPnlPct, position
             {s.value}
           </div>
           {s.sub && (
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.75rem', color: s.color, marginTop: '0.15rem' }}>
+            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', color: i === 0 ? 'var(--text-dim)' : s.color, marginTop: '0.15rem' }}>
               {s.sub}
             </div>
           )}

@@ -79,6 +79,14 @@ function initSchema() {
       rate REAL NOT NULL,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS cash_balance (
+      id INTEGER PRIMARY KEY CHECK(id = 1),
+      amount REAL NOT NULL DEFAULT 0,
+      last_updated TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    INSERT OR IGNORE INTO cash_balance (id, amount) VALUES (1, 0);
   `);
 
   seedData();

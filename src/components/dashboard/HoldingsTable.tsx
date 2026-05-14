@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Edit2, TrendingDown } from 'lucide-react';
 import ConvictionBadge from '@/components/shared/ConvictionBadge';
 import PriceChange from '@/components/shared/PriceChange';
@@ -78,8 +78,8 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
               const pnlPos = h.pnl_pct >= 0;
               const conviction = h.conviction as 'very-high' | 'high' | 'medium' | 'speculative';
               return (
-                <>
-                  <tr key={h.id} style={{ cursor: 'pointer' }} onClick={() => toggle(h.id)}>
+                <React.Fragment key={h.id}>
+                  <tr style={{ cursor: 'pointer' }} onClick={() => toggle(h.id)}>
                     <td style={{ width: 24, paddingRight: 0 }}>
                       {open ? <ChevronDown size={12} color="var(--text-dim)" /> : <ChevronRight size={12} color="var(--text-dim)" />}
                     </td>
@@ -126,7 +126,7 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
                     </td>
                   </tr>
                   {open && (
-                    <tr key={`${h.id}-expanded`}>
+                    <tr>
                       <td colSpan={12} style={{ background: 'var(--surface2)', padding: '0.75rem 1.5rem' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                           <div>
@@ -155,7 +155,7 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               );
             })}
           </tbody>

@@ -121,18 +121,24 @@ export async function DELETE(req: NextRequest) {
     if (!holding) return NextResponse.json({ error: 'Holding not found' }, { status: 404 });
 
     const realized_pnl = (sell_price_mxn - holding.entry_price_mxn) * holding.shares;
+    const proceeds = sell_price_mxn * holding.shares;
 
-    db.prepare(`
-      INSERT INTO trade_log (ticker, name, action, shares, price_mxn, total_mxn, date, notes, realized_pnl_mxn)
-      VALUES (?, ?, 'SELL', ?, ?, ?, ?, ?, ?)
-    `).run(
-      holding.ticker, holding.name, holding.shares,
-      sell_price_mxn, sell_price_mxn * holding.shares,
-      sell_date, notes ?? null, realized_pnl
-    );
+    db.transaction(() => {
+      db.prepare(`
+        INSERT INTO trade_log (ticker, name, action, shares, price_mxn, total_mxn, date, notes, realized_pnl_mxn)
+        VALUES (?, ?, 'SELL', ?, ?, ?, ?, ?, ?)
+      `).run(
+        holding.ticker, holding.name, holding.shares,
+        sell_price_mxn, proceeds,
+        sell_date, notes ?? null, realized_pnl
+      );
+      db.prepare('DELETE FROM holdings WHERE id = ?').run(id);
+      db.prepare(`
+        UPDATE cash_balance SET amount = amount + ?, last_updated = datetime('now') WHERE id = 1
+      `).run(proceeds);
+    })();
 
-    db.prepare('DELETE FROM holdings WHERE id = ?').run(id);
-    return NextResponse.json({ success: true, realized_pnl });
+    return NextResponse.json({ success: true, realized_pnl, proceeds });
   } catch (err) {
     console.error('[holdings DELETE]', err);
     return NextResponse.json({ error: 'Failed to sell holding' }, { status: 500 });

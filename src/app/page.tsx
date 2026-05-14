@@ -4,12 +4,14 @@ import SummaryBar from '@/components/dashboard/SummaryBar';
 import HoldingsTable, { Holding } from '@/components/dashboard/HoldingsTable';
 import AlertsBanner, { Alert } from '@/components/dashboard/AlertsBanner';
 import NewsPanel from '@/components/dashboard/NewsPanel';
+import CashBalance from '@/components/dashboard/CashBalance';
 import EditHoldingModal from '@/components/holdings/EditHoldingModal';
 import SellModal from '@/components/holdings/SellModal';
 import { getAlertLevel, getStopLossPrice } from '@/lib/calculations';
 
 export default function DashboardPage() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
+  const [cashAmount, setCashAmount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [editTarget, setEditTarget] = useState<Holding | null>(null);
   const [sellTarget, setSellTarget] = useState<Holding | null>(null);
@@ -69,6 +71,7 @@ export default function DashboardPage() {
         totalPnlPct={totalPnlPct}
         positions={holdings.length}
         alerts={alerts.length}
+        cashBalance={cashAmount}
       />
 
       {alerts.length > 0 && (
@@ -78,6 +81,10 @@ export default function DashboardPage() {
       )}
 
       <div style={{ padding: '0 1.5rem 1.5rem' }}>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <CashBalance onBalanceChange={setCashAmount} />
+        </div>
+
         {loading ? (
           <div style={{ textAlign: 'center', padding: '3rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
             Loading portfolio...
@@ -87,7 +94,7 @@ export default function DashboardPage() {
             <HoldingsTable
               holdings={holdings}
               onEdit={setEditTarget}
-              onSell={setSellTarget}
+              onSell={h => setSellTarget(h)}
             />
             <NewsPanel />
           </div>
@@ -105,7 +112,7 @@ export default function DashboardPage() {
         <SellModal
           holding={sellTarget}
           onClose={() => setSellTarget(null)}
-          onSold={load}
+          onSold={() => { load(); }}
         />
       )}
     </div>

@@ -18,22 +18,28 @@ function isFresh(updatedAt: string, ttlMs: number): boolean {
 }
 
 export async function getFxRate(): Promise<number> {
+  const { rate } = await getFxRateInfo();
+  return rate;
+}
+
+export async function getFxRateInfo(): Promise<{ rate: number; live: boolean }> {
   const db = getDb();
   const cached = db.prepare(`SELECT * FROM fx_cache WHERE pair = 'USDMXN'`).get() as
     | { rate: number; updated_at: string }
     | undefined;
 
   if (cached && isFresh(cached.updated_at, FX_TTL_MS)) {
-    return cached.rate;
+    return { rate: cached.rate, live: true };
   }
 
   const rate = await fetchForexRate();
   if (rate) {
     db.prepare(`INSERT OR REPLACE INTO fx_cache (pair, rate, updated_at) VALUES ('USDMXN', ?, datetime('now'))`).run(rate);
-    return rate;
+    return { rate, live: true };
   }
 
-  return cached?.rate ?? 17.5;
+  if (cached) return { rate: cached.rate, live: false };
+  return { rate: 17.5, live: false };
 }
 
 export async function getPrices(tickers: string[]): Promise<Record<string, CachedPrice>> {

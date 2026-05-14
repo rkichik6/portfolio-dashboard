@@ -75,15 +75,25 @@ export async function fetchCompanyNews(
 }
 
 export async function fetchForexRate(): Promise<number | null> {
+  // Try Finnhub OANDA quote (works on free tier)
   try {
-    const { data } = await axios.get<FinnhubForexRates>(`${BASE_URL}/forex/rates`, {
-      params: { base: 'USD', token: API_KEY },
+    const { data } = await axios.get<FinnhubQuote>(`${BASE_URL}/quote`, {
+      params: { symbol: 'OANDA:USD_MXN', token: API_KEY },
       timeout: 5000,
     });
-    return data?.quote?.MXN ?? null;
-  } catch {
-    return null;
-  }
+    if (data?.c && data.c > 5) return data.c;
+  } catch { /* fall through */ }
+
+  // Fallback: Frankfurter (no API key required)
+  try {
+    const { data } = await axios.get<{ rates: Record<string, number> }>(
+      'https://api.frankfurter.app/latest',
+      { params: { from: 'USD', to: 'MXN' }, timeout: 8000 }
+    );
+    if (data?.rates?.MXN) return data.rates.MXN;
+  } catch { /* fall through */ }
+
+  return null;
 }
 
 export async function fetchCompanyProfile(ticker: string): Promise<{ name: string } | null> {

@@ -12,8 +12,8 @@ export default function Header() {
   async function fetchFx() {
     try {
       const res = await fetch('/api/fx');
-      const data = await res.json() as { rate: number };
-      setFxRate(data.rate);
+      const data = await res.json() as { rate: number; live: boolean };
+      setFxRate(data.live ? data.rate : null);
       setLastUpdate(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
     } catch { /* ignore */ }
   }
@@ -62,12 +62,12 @@ export default function Header() {
         }}>
           {marketStatus.label}
         </span>
-        {fxRate && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>USD/MXN</span>
-            <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 600 }}>{fxRate.toFixed(2)}</span>
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>USD/MXN</span>
+          <span style={{ fontSize: 12, color: fxRate ? 'var(--text)' : 'var(--muted)', fontWeight: 600 }}>
+            {fxRate ? fxRate.toFixed(2) : '--'}
+          </span>
+        </div>
         {lastUpdate && (
           <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{lastUpdate}</span>
         )}

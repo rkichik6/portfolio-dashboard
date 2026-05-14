@@ -56,6 +56,19 @@ export function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+export function formatNewsTime(datetime: number): string {
+  const date = new Date(datetime * 1000);
+  const p: Record<string, string> = {};
+  new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Mexico_City',
+    month: 'short', day: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(date).forEach(part => {
+    if (part.type !== 'literal') p[part.type] = part.value;
+  });
+  return `${p.month.toUpperCase()} ${p.day}, ${p.year} ${p.hour}:${p.minute}`;
+}
+
 export function getRealizedPnl(
   buyPrice: number,
   sellPrice: number,

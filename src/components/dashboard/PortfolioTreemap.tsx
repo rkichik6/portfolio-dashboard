@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Treemap } from 'recharts';
-import { formatMxn, getDistanceToStop, getStopLossPrice } from '@/lib/calculations';
+import { formatMxn, formatNewsTime, getDistanceToStop, getStopLossPrice } from '@/lib/calculations';
 import type { Holding } from '@/components/dashboard/HoldingsTable';
 import { X } from 'lucide-react';
 
@@ -179,8 +179,12 @@ export default function PortfolioTreemap({ holdings }: PortfolioTreemapProps) {
               {tipNews.length > 0 && (
                 <div style={{ marginTop: 6, borderTop: '1px solid var(--border)', paddingTop: 6 }}>
                   {tipNews.map((n, i) => (
-                    <div key={i} style={{ fontSize: 9, color: 'var(--text-dim)', marginTop: i > 0 ? 4 : 0, lineHeight: 1.4 }}>
-                      {n.headline}
+                    <div key={i} style={{ marginTop: i > 0 ? 6 : 0 }}>
+                      <div style={{ fontSize: 9, marginBottom: 2 }}>
+                        <span style={{ color: '#888888' }}>{n.datetime ? formatNewsTime(n.datetime) : ''}</span>
+                        {n.source && <span style={{ color: 'var(--accent)', marginLeft: 6 }}>{n.source.toUpperCase()}</span>}
+                      </div>
+                      <div style={{ fontSize: 9, color: 'var(--text-dim)', lineHeight: 1.4 }}>{n.headline}</div>
                     </div>
                   ))}
                 </div>
@@ -219,12 +223,24 @@ export default function PortfolioTreemap({ holdings }: PortfolioTreemapProps) {
                 <div>
                   <div style={{ fontSize: 9, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>RECENT NEWS</div>
                   {modalNews.map((article, i) => (
-                    <div key={i} style={{ marginBottom: 8, paddingBottom: 8, borderBottom: i < modalNews.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                      <a href={article.url} target="_blank" rel="noopener noreferrer"
-                        style={{ color: 'var(--text)', fontSize: 11, lineHeight: 1.5, textDecoration: 'none' }}>
-                        {article.headline}
-                      </a>
-                      <div style={{ fontSize: 9, color: 'var(--text-dim)', marginTop: 2 }}>{article.source}</div>
+                    <div key={i} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: i < modalNews.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                      <div style={{ fontSize: 10, marginBottom: 4 }}>
+                        <span style={{ color: '#888888' }}>{article.datetime ? formatNewsTime(article.datetime) : ''}</span>
+                        {article.source && <span style={{ color: 'var(--accent)', marginLeft: 8 }}>{article.source.toUpperCase()}</span>}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                        <span style={{ color: 'var(--text)', fontSize: 11, lineHeight: 1.5 }}>{article.headline}</span>
+                        {article.url && (
+                          <button
+                            onClick={() => window.open(article.url, '_blank', 'noopener,noreferrer')}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 16, lineHeight: 1, flexShrink: 0, padding: '0 2px' }}
+                            onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--accent)')}
+                          >
+                            +
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

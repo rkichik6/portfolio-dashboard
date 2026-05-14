@@ -25,6 +25,16 @@ export interface Holding {
   price_stale?: boolean;
 }
 
+type SortDir = 'asc' | 'desc';
+type SortCol = 'ticker' | 'bucket' | 'shares' | 'entry_price_mxn' | 'current_price_mxn' | 'change_pct' | 'pnl_pct' | 'total_value_mxn' | 'stop_loss_price' | 'conviction';
+
+const CONVICTION_RANK: Record<string, number> = { speculative: 0, medium: 1, high: 2, 'very-high': 3 };
+
+function arrow(col: SortCol, sortCol: SortCol, sortDir: SortDir) {
+  if (col !== sortCol) return null;
+  return <span style={{ color: '#ff8c00', marginLeft: 3 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+}
+
 interface HoldingsTableProps {
   holdings: Holding[];
   onEdit: (h: Holding) => void;
@@ -33,6 +43,8 @@ interface HoldingsTableProps {
 
 export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTableProps) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [sortCol, setSortCol] = useState<SortCol>('total_value_mxn');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   function toggle(id: number) {
     setExpanded(prev => {
@@ -42,10 +54,31 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
     });
   }
 
-  const bucketOrder = ['core', 'swing'];
+  function handleSort(col: SortCol) {
+    if (col === sortCol) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortCol(col); setSortDir('asc'); }
+  }
+
+  const thStyle: React.CSSProperties = { cursor: 'pointer', userSelect: 'none' };
+
   const sorted = [...holdings].sort((a, b) => {
-    const bi = bucketOrder.indexOf(a.bucket) - bucketOrder.indexOf(b.bucket);
-    return bi !== 0 ? bi : a.ticker.localeCompare(b.ticker);
+    let va: number | string;
+    let vb: number | string;
+    switch (sortCol) {
+      case 'ticker':            va = a.ticker;                       vb = b.ticker;                       break;
+      case 'bucket':            va = a.bucket;                       vb = b.bucket;                       break;
+      case 'shares':            va = a.shares;                       vb = b.shares;                       break;
+      case 'entry_price_mxn':  va = a.entry_price_mxn;              vb = b.entry_price_mxn;              break;
+      case 'current_price_mxn':va = a.current_price_mxn;            vb = b.current_price_mxn;            break;
+      case 'change_pct':       va = a.change_pct;                   vb = b.change_pct;                   break;
+      case 'pnl_pct':          va = a.pnl_pct;                      vb = b.pnl_pct;                      break;
+      case 'total_value_mxn':  va = a.total_value_mxn;              vb = b.total_value_mxn;              break;
+      case 'stop_loss_price':  va = a.stop_loss_price;              vb = b.stop_loss_price;              break;
+      case 'conviction':        va = CONVICTION_RANK[a.conviction] ?? 0; vb = CONVICTION_RANK[b.conviction] ?? 0; break;
+      default:                  va = a.total_value_mxn;              vb = b.total_value_mxn;
+    }
+    const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
+    return sortDir === 'asc' ? cmp : -cmp;
   });
 
   return (
@@ -59,16 +92,16 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
           <thead>
             <tr>
               <th style={{ width: 20 }}></th>
-              <th>Ticker</th>
-              <th>Bucket</th>
-              <th className="right">Shares</th>
-              <th className="right">Entry</th>
-              <th className="right">Current</th>
-              <th className="right">Day %</th>
-              <th className="right">P&L</th>
-              <th className="right">Value</th>
-              <th>Stop</th>
-              <th>Conv</th>
+              <th style={thStyle} onClick={() => handleSort('ticker')}>Ticker{arrow('ticker', sortCol, sortDir)}</th>
+              <th style={thStyle} onClick={() => handleSort('bucket')}>Bucket{arrow('bucket', sortCol, sortDir)}</th>
+              <th className="right" style={thStyle} onClick={() => handleSort('shares')}>Shares{arrow('shares', sortCol, sortDir)}</th>
+              <th className="right" style={thStyle} onClick={() => handleSort('entry_price_mxn')}>Entry{arrow('entry_price_mxn', sortCol, sortDir)}</th>
+              <th className="right" style={thStyle} onClick={() => handleSort('current_price_mxn')}>Current{arrow('current_price_mxn', sortCol, sortDir)}</th>
+              <th className="right" style={thStyle} onClick={() => handleSort('change_pct')}>Day %{arrow('change_pct', sortCol, sortDir)}</th>
+              <th className="right" style={thStyle} onClick={() => handleSort('pnl_pct')}>P&L{arrow('pnl_pct', sortCol, sortDir)}</th>
+              <th className="right" style={thStyle} onClick={() => handleSort('total_value_mxn')}>Value{arrow('total_value_mxn', sortCol, sortDir)}</th>
+              <th style={thStyle} onClick={() => handleSort('stop_loss_price')}>Stop{arrow('stop_loss_price', sortCol, sortDir)}</th>
+              <th style={thStyle} onClick={() => handleSort('conviction')}>Conv{arrow('conviction', sortCol, sortDir)}</th>
               <th></th>
             </tr>
           </thead>

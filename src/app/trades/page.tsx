@@ -29,6 +29,18 @@ export default function TradesPage() {
   const [filterAction, setFilterAction] = useState('');
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
+  const [sortCol, setSortCol] = useState<'date' | 'ticker' | 'action' | 'shares' | 'price_mxn' | 'total_mxn'>('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  function handleSort(col: typeof sortCol) {
+    if (col === sortCol) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortCol(col); setSortDir('asc'); }
+  }
+
+  function trArrow(col: typeof sortCol) {
+    if (col !== sortCol) return null;
+    return <span style={{ color: '#ff8c00', marginLeft: 3 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,6 +62,19 @@ export default function TradesPage() {
   }, [filterTicker, filterAction, filterFrom, filterTo]);
 
   useEffect(() => { load(); }, [load]);
+
+  const sortedTrades = [...trades].sort((a, b) => {
+    let cmp = 0;
+    switch (sortCol) {
+      case 'date':      cmp = a.date.localeCompare(b.date); break;
+      case 'ticker':    cmp = a.ticker.localeCompare(b.ticker); break;
+      case 'action':    cmp = a.action.localeCompare(b.action); break;
+      case 'shares':    cmp = a.shares - b.shares; break;
+      case 'price_mxn': cmp = a.price_mxn - b.price_mxn; break;
+      case 'total_mxn': cmp = a.total_mxn - b.total_mxn; break;
+    }
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
 
   const pnlPos = summary.total_realized_pnl >= 0;
 
@@ -99,12 +124,12 @@ export default function TradesPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Ticker</th>
-                <th>Action</th>
-                <th className="right">Shares</th>
-                <th className="right">Price</th>
-                <th className="right">Total</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('date')}>Date{trArrow('date')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('ticker')}>Ticker{trArrow('ticker')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('action')}>Action{trArrow('action')}</th>
+                <th className="right" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('shares')}>Shares{trArrow('shares')}</th>
+                <th className="right" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('price_mxn')}>Price{trArrow('price_mxn')}</th>
+                <th className="right" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('total_mxn')}>Total{trArrow('total_mxn')}</th>
                 <th className="right">P&L</th>
                 <th>Notes</th>
               </tr>
@@ -116,7 +141,7 @@ export default function TradesPage() {
               {!loading && trades.length === 0 && (
                 <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>NO TRADES FOUND</td></tr>
               )}
-              {!loading && trades.map(t => (
+              {!loading && sortedTrades.map(t => (
                 <tr key={t.id}>
                   <td>{t.date}</td>
                   <td>

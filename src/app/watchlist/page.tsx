@@ -22,6 +22,18 @@ export default function WatchlistPage() {
   const [moveTarget, setMoveTarget] = useState<WatchlistItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [activeTag, setActiveTag] = useState<number | null>(null);
+  const [sortCol, setSortCol] = useState<'ticker' | 'current_price_mxn' | 'target_price_mxn' | 'gap_pct' | 'tags'>('ticker');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+  function handleSort(col: typeof sortCol) {
+    if (col === sortCol) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortCol(col); setSortDir('asc'); }
+  }
+
+  function wlArrow(col: typeof sortCol) {
+    if (col !== sortCol) return null;
+    return <span style={{ color: '#ff8c00', marginLeft: 3 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  }
 
   const load = useCallback(async () => {
     try {
@@ -44,7 +56,32 @@ export default function WatchlistPage() {
     load();
   }
 
-  const filtered = activeTag ? items.filter(i => i.tags.some(t => t.id === activeTag)) : items;
+  const base = activeTag ? items.filter(i => i.tags.some(t => t.id === activeTag)) : items;
+
+  const filtered = [...base].sort((a, b) => {
+    let cmp = 0;
+    switch (sortCol) {
+      case 'ticker':           cmp = a.ticker.localeCompare(b.ticker); break;
+      case 'current_price_mxn':
+        if (a.current_price_mxn == null && b.current_price_mxn == null) cmp = 0;
+        else if (a.current_price_mxn == null) cmp = 1;
+        else if (b.current_price_mxn == null) cmp = -1;
+        else cmp = a.current_price_mxn - b.current_price_mxn; break;
+      case 'target_price_mxn':
+        if (a.target_price_mxn == null && b.target_price_mxn == null) cmp = 0;
+        else if (a.target_price_mxn == null) cmp = 1;
+        else if (b.target_price_mxn == null) cmp = -1;
+        else cmp = a.target_price_mxn - b.target_price_mxn; break;
+      case 'gap_pct':
+        if (a.gap_pct == null && b.gap_pct == null) cmp = 0;
+        else if (a.gap_pct == null) cmp = 1;
+        else if (b.gap_pct == null) cmp = -1;
+        else cmp = a.gap_pct - b.gap_pct; break;
+      case 'tags':
+        cmp = (a.tags[0]?.name ?? '').localeCompare(b.tags[0]?.name ?? ''); break;
+    }
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
 
   return (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -100,12 +137,12 @@ export default function WatchlistPage() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Ticker</th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('ticker')}>Ticker{wlArrow('ticker')}</th>
                   <th>Company</th>
-                  <th className="right">Current</th>
-                  <th className="right">Target</th>
-                  <th className="right">Gap</th>
-                  <th>Tags</th>
+                  <th className="right" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('current_price_mxn')}>Current{wlArrow('current_price_mxn')}</th>
+                  <th className="right" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('target_price_mxn')}>Target{wlArrow('target_price_mxn')}</th>
+                  <th className="right" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('gap_pct')}>Gap{wlArrow('gap_pct')}</th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('tags')}>Tags{wlArrow('tags')}</th>
                   <th>Notes</th>
                   <th></th>
                 </tr>

@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Sidebar />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <Header />
-            <main className="grid-bg" style={{ flex: 1, overflowY: 'auto' }}>
+            <main style={{ flex: 1, overflowY: 'auto' }}>
               {children}
             </main>
           </div>

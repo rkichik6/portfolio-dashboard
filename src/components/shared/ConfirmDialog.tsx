@@ -14,7 +14,7 @@ export default function ConfirmDialog({ title, message, onConfirm, onCancel, con
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 className="mono" style={{ fontSize: '0.85rem' }}>{title}</h3>
+          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>{title}</h3>
         </div>
         <div className="modal-body">
           <p style={{ fontSize: '0.875rem', color: 'var(--text-dim)', lineHeight: 1.5 }}>{message}</p>

@@ -34,8 +34,8 @@ export default function HoldingsPage() {
     <div style={{ padding: '1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
         <div>
-          <h1 className="mono" style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>Holdings</h1>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+          <h1 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Holdings</h1>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
             {holdings.length} positions · {totalPnl >= 0 ? '+' : ''}{(totalPnl / Math.max(1, totalValue - totalPnl) * 100).toFixed(2)}% total return
           </div>
         </div>
@@ -45,8 +45,8 @@ export default function HoldingsPage() {
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-          Loading...
+        <div style={{ textAlign: 'center', padding: '3rem', fontSize: '0.8125rem', color: 'var(--text-dim)' }}>
+          Loading…
         </div>
       ) : (
         <HoldingsTable

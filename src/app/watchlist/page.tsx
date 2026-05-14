@@ -61,8 +61,8 @@ export default function WatchlistPage() {
     <div style={{ padding: '1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
-          <h1 className="mono" style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>Watchlist</h1>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+          <h1 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Watchlist</h1>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
             {items.length} stocks being monitored
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function WatchlistPage() {
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+        <div style={{ textAlign: 'center', padding: '3rem', fontSize: '0.8125rem', color: 'var(--text-dim)' }}>
           Loading...
         </div>
       ) : (
@@ -120,7 +120,7 @@ export default function WatchlistPage() {
             />
           ))}
           {filtered.length === 0 && (
-            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem', color: 'var(--muted)' }}>
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', fontSize: '0.8125rem', color: 'var(--muted)' }}>
               No watchlist items found.
             </div>
           )}

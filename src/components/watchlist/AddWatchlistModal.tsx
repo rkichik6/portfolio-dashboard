@@ -62,7 +62,7 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 className="mono" style={{ fontSize: '0.85rem' }}>Add to Watchlist</h3>
+          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>Add to Watchlist</h3>
           <button className="btn" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}><X size={14} /></button>
         </div>
         <div className="modal-body">

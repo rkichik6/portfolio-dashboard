@@ -55,7 +55,7 @@ export default function TradesPage() {
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <h1 className="mono" style={{ fontSize: '1rem', marginBottom: '1.25rem' }}>Trade Log</h1>
+      <h1 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.25rem' }}>Trade Log</h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.25rem' }}>
         {[
@@ -64,8 +64,8 @@ export default function TradesPage() {
           { label: 'Win Rate', value: `${summary.win_rate}%`, color: summary.win_rate >= 50 ? 'var(--accent2)' : 'var(--danger)' },
         ].map((s, i) => (
           <div key={i} className="card">
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>{s.label}</div>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '1.1rem', color: s.color, fontWeight: 700 }}>{s.value}</div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>{s.label}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: s.color, fontWeight: 700 }}>{s.value}</div>
           </div>
         ))}
       </div>
@@ -122,14 +122,14 @@ export default function TradesPage() {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '2rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
                     Loading...
                   </td>
                 </tr>
               )}
               {!loading && trades.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '2rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
                     No trades found.
                   </td>
                 </tr>
@@ -138,13 +138,13 @@ export default function TradesPage() {
                 <tr key={t.id}>
                   <td className="number" style={{ fontSize: '0.8rem' }}>{t.date}</td>
                   <td>
-                    <div style={{ fontFamily: 'Space Mono, monospace', fontWeight: 700, color: 'var(--accent)', fontSize: '0.85rem' }}>{t.ticker}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent)', fontSize: '0.82rem' }}>{t.ticker}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{t.name}</div>
                   </td>
                   <td>
                     <span className="badge" style={{
                       color: t.action === 'BUY' ? 'var(--accent2)' : 'var(--danger)',
-                      borderColor: t.action === 'BUY' ? 'var(--accent2)' : 'var(--danger)',
+                      borderColor: t.action === 'BUY' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)',
                     }}>
                       {t.action}
                     </span>

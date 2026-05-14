@@ -52,38 +52,15 @@ export default function SummaryBar({
 
   return (
     <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-      {/* Grand total — headline */}
-      <div style={{
-        padding: '1.25rem 1.5rem 1rem',
-        borderBottom: '1px solid var(--border)',
-        background: 'linear-gradient(90deg, rgba(0,212,255,0.04) 0%, transparent 60%)',
-      }}>
-        <div style={{
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '0.65rem',
-          color: 'var(--text-dim)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          marginBottom: '0.4rem',
-        }}>
+      {/* Grand total headline */}
+      <div style={{ padding: '1.25rem 1.5rem 1rem', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.4rem' }}>
           Total Portfolio Value
         </div>
-        <div style={{
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '2rem',
-          fontWeight: 700,
-          color: 'var(--accent)',
-          letterSpacing: '-0.02em',
-          lineHeight: 1,
-        }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', fontWeight: 700, color: 'var(--accent)', letterSpacing: '-0.02em', lineHeight: 1 }}>
           {formatMxn(grandTotal)}
         </div>
-        <div style={{
-          fontFamily: 'Space Mono, monospace',
-          fontSize: '0.7rem',
-          color: 'var(--text-dim)',
-          marginTop: '0.4rem',
-        }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.4rem' }}>
           {formatMxn(positionsValue)} positions &nbsp;+&nbsp; {cashBalance > 0 ? formatMxn(cashBalance) : '$0.00 MXN'} cash
         </div>
       </div>
@@ -91,35 +68,15 @@ export default function SummaryBar({
       {/* Breakdown stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
         {breakdown.map((s, i) => (
-          <div key={i} style={{
-            padding: '0.75rem 1.25rem',
-            borderRight: i < breakdown.length - 1 ? '1px solid var(--border)' : 'none',
-          }}>
-            <div style={{
-              fontFamily: 'Space Mono, monospace',
-              fontSize: '0.6rem',
-              color: 'var(--text-dim)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom: '0.3rem',
-            }}>
+          <div key={i} style={{ padding: '0.75rem 1.25rem', borderRight: i < breakdown.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.3rem' }}>
               {s.label}
             </div>
-            <div style={{
-              fontFamily: 'Space Mono, monospace',
-              fontSize: '0.9rem',
-              color: s.color,
-              fontWeight: 700,
-            }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: s.color, fontWeight: 700 }}>
               {s.value}
             </div>
             {s.sub && (
-              <div style={{
-                fontFamily: 'Space Mono, monospace',
-                fontSize: '0.68rem',
-                color: s.color,
-                marginTop: '0.1rem',
-              }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: s.color, marginTop: '0.1rem' }}>
                 {s.sub}
               </div>
             )}

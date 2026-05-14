@@ -57,25 +57,25 @@ export default function SellModal({ holding, onClose, onSold }: SellModalProps) 
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 className="mono" style={{ fontSize: '0.85rem' }}>Sell {holding.ticker}</h3>
+          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>Sell <span style={{ fontFamily: 'var(--font-mono)' }}>{holding.ticker}</span></h3>
           <button className="btn" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}><X size={14} /></button>
         </div>
         <div className="modal-body">
           {error && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</div>}
 
           <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', padding: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', fontSize: '0.78rem' }}>
               <div>
-                <div style={{ color: 'var(--text-dim)', marginBottom: '0.2rem' }}>SHARES</div>
-                <div>{holding.shares}</div>
+                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>Shares</div>
+                <div style={{ fontFamily: 'var(--font-mono)' }}>{holding.shares}</div>
               </div>
               <div>
-                <div style={{ color: 'var(--text-dim)', marginBottom: '0.2rem' }}>ENTRY</div>
-                <div>{formatMxn(holding.entry_price_mxn)}</div>
+                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>Entry</div>
+                <div style={{ fontFamily: 'var(--font-mono)' }}>{formatMxn(holding.entry_price_mxn)}</div>
               </div>
               <div>
-                <div style={{ color: 'var(--text-dim)', marginBottom: '0.2rem' }}>REALIZED P&L</div>
-                <div style={{ color: pnlPos ? 'var(--accent2)' : 'var(--danger)' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>Realized P&L</div>
+                <div style={{ fontFamily: 'var(--font-mono)', color: pnlPos ? 'var(--accent2)' : 'var(--danger)' }}>
                   {pnlPos ? '+' : ''}{formatMxn(previewPnl)} ({pnlPos ? '+' : ''}{previewPct.toFixed(2)}%)
                 </div>
               </div>

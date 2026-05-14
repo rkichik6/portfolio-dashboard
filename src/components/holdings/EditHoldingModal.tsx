@@ -48,7 +48,7 @@ export default function EditHoldingModal({ holding, onClose, onSaved }: EditHold
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 className="mono" style={{ fontSize: '0.85rem' }}>Edit {holding.ticker}</h3>
+          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>Edit <span style={{ fontFamily: 'var(--font-mono)' }}>{holding.ticker}</span></h3>
           <button className="btn" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}><X size={14} /></button>
         </div>
         <div className="modal-body">

@@ -26,7 +26,7 @@ export default function WatchlistCard({ item, onDelete, onMoveToHoldings }: Watc
     <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontWeight: 700, color: 'var(--accent)', fontSize: '0.95rem' }}>{item.ticker}</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent)', fontSize: '0.875rem' }}>{item.ticker}</div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '0.1rem' }}>{item.name}</div>
         </div>
         <div style={{ display: 'flex', gap: '0.3rem' }}>
@@ -42,19 +42,19 @@ export default function WatchlistCard({ item, onDelete, onMoveToHoldings }: Watc
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
         {item.current_price_mxn != null && (
           <div>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.15rem' }}>Current</div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.15rem' }}>Current</div>
             <div className="number" style={{ fontSize: '0.82rem' }}>{formatMxn(item.current_price_mxn)}</div>
           </div>
         )}
         {item.target_price_mxn != null && (
           <div>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.15rem' }}>Target</div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.15rem' }}>Target</div>
             <div className="number" style={{ fontSize: '0.82rem', color: 'var(--warning)' }}>{formatMxn(item.target_price_mxn)}</div>
           </div>
         )}
         {item.gap_pct != null && (
           <div>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.15rem' }}>Gap to Target</div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.15rem' }}>Gap to Target</div>
             <div className="number" style={{ fontSize: '0.82rem', color: gapPos ? 'var(--accent2)' : 'var(--danger)' }}>
               {gapPos ? '+' : ''}{item.gap_pct.toFixed(1)}%
             </div>
@@ -63,7 +63,7 @@ export default function WatchlistCard({ item, onDelete, onMoveToHoldings }: Watc
       </div>
 
       {item.notes && (
-        <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', lineHeight: 1.4 }}>
+        <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', lineHeight: 1.5 }}>
           {item.notes}
         </div>
       )}

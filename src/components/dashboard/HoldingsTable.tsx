@@ -51,7 +51,7 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
       <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Holdings</span>
+        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Holdings</span>
         <span className="badge" style={{ color: 'var(--accent)', borderColor: 'var(--accent)' }}>{holdings.length}</span>
       </div>
       <div style={{ overflowX: 'auto' }}>
@@ -61,15 +61,15 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
               <th style={{ width: 24 }}></th>
               <th>Ticker</th>
               <th>Bucket</th>
-              <th>Shares</th>
-              <th>Entry</th>
-              <th>Current</th>
-              <th>Day %</th>
-              <th>P&L</th>
-              <th>Value</th>
+              <th className="right">Shares</th>
+              <th className="right">Entry</th>
+              <th className="right">Current</th>
+              <th className="right">Day %</th>
+              <th className="right">P&L</th>
+              <th className="right">Value</th>
               <th>Stop Loss</th>
               <th>Conviction</th>
-              <th>Actions</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -84,28 +84,31 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
                       {open ? <ChevronDown size={12} color="var(--text-dim)" /> : <ChevronRight size={12} color="var(--text-dim)" />}
                     </td>
                     <td>
-                      <div style={{ fontFamily: 'Space Mono, monospace', fontWeight: 700, color: 'var(--accent)', fontSize: '0.85rem' }}>{h.ticker}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent)', fontSize: '0.82rem' }}>{h.ticker}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>{h.name}</div>
                       {h.price_stale && <div style={{ fontSize: '0.65rem', color: 'var(--warning)' }}>Delayed</div>}
                     </td>
                     <td>
-                      <span className="badge" style={{ color: h.bucket === 'core' ? 'var(--accent)' : 'var(--warning)', borderColor: h.bucket === 'core' ? 'var(--accent)' : 'var(--warning)' }}>
+                      <span className="badge" style={{
+                        color: h.bucket === 'core' ? 'var(--accent)' : 'var(--warning)',
+                        borderColor: h.bucket === 'core' ? 'rgba(59,130,246,0.3)' : 'rgba(245,158,11,0.3)',
+                      }}>
                         {h.bucket}
                       </span>
                     </td>
-                    <td className="number">{h.shares}</td>
-                    <td className="number" style={{ fontSize: '0.82rem' }}>{formatMxn(h.entry_price_mxn)}</td>
-                    <td className="number" style={{ fontSize: '0.82rem' }}>{formatMxn(h.current_price_mxn)}</td>
-                    <td><PriceChange value={h.change_pct} /></td>
-                    <td>
-                      <div style={{ fontFamily: 'Space Mono, monospace', color: pnlPos ? 'var(--accent2)' : 'var(--danger)', fontSize: '0.82rem' }}>
+                    <td className="number right">{h.shares}</td>
+                    <td className="number right" style={{ fontSize: '0.82rem' }}>{formatMxn(h.entry_price_mxn)}</td>
+                    <td className="number right" style={{ fontSize: '0.82rem' }}>{formatMxn(h.current_price_mxn)}</td>
+                    <td className="right"><PriceChange value={h.change_pct} /></td>
+                    <td className="right">
+                      <div style={{ fontFamily: 'var(--font-mono)', color: pnlPos ? 'var(--accent2)' : 'var(--danger)', fontSize: '0.82rem' }}>
                         {pnlPos ? '+' : ''}{h.pnl_pct.toFixed(2)}%
                       </div>
-                      <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.72rem', color: pnlPos ? 'var(--accent2)' : 'var(--danger)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: pnlPos ? 'var(--accent2)' : 'var(--danger)' }}>
                         {pnlPos ? '+' : ''}{formatMxn(h.pnl_mxn)}
                       </div>
                     </td>
-                    <td className="number" style={{ fontSize: '0.82rem' }}>{formatMxn(h.total_value_mxn)}</td>
+                    <td className="number right" style={{ fontSize: '0.82rem' }}>{formatMxn(h.total_value_mxn)}</td>
                     <td>
                       <StopLossBar
                         entryPrice={h.entry_price_mxn}
@@ -130,26 +133,21 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
                       <td colSpan={12} style={{ background: 'var(--surface2)', padding: '0.75rem 1.5rem' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                           <div>
-                            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Thesis</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.5 }}>{h.thesis ?? 'No thesis recorded.'}</div>
+                            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.3rem' }}>Thesis</div>
+                            <div style={{ fontSize: '0.8125rem', color: 'var(--text)', lineHeight: 1.6 }}>{h.thesis ?? 'No thesis recorded.'}</div>
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                            <div>
-                              <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Entry Date</div>
-                              <div className="number" style={{ fontSize: '0.82rem' }}>{h.entry_date}</div>
-                            </div>
-                            <div>
-                              <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Stop Loss</div>
-                              <div className="number" style={{ fontSize: '0.82rem', color: 'var(--danger)' }}>{formatMxn(h.stop_loss_price)}</div>
-                            </div>
-                            <div>
-                              <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Total Cost</div>
-                              <div className="number" style={{ fontSize: '0.82rem' }}>{formatMxn(h.entry_price_mxn * h.shares)}</div>
-                            </div>
-                            <div>
-                              <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Current Value</div>
-                              <div className="number" style={{ fontSize: '0.82rem' }}>{formatMxn(h.total_value_mxn)}</div>
-                            </div>
+                            {[
+                              { label: 'Entry Date', value: h.entry_date, mono: true },
+                              { label: 'Stop Loss', value: formatMxn(h.stop_loss_price), mono: true, danger: true },
+                              { label: 'Total Cost', value: formatMxn(h.entry_price_mxn * h.shares), mono: true },
+                              { label: 'Current Value', value: formatMxn(h.total_value_mxn), mono: true },
+                            ].map(item => (
+                              <div key={item.label}>
+                                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>{item.label}</div>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: item.danger ? 'var(--danger)' : 'var(--text)' }}>{item.value}</div>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </td>

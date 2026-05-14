@@ -5,6 +5,8 @@ import HoldingsTable, { Holding } from '@/components/dashboard/HoldingsTable';
 import AlertsBanner, { Alert } from '@/components/dashboard/AlertsBanner';
 import NewsPanel from '@/components/dashboard/NewsPanel';
 import CashBalance from '@/components/dashboard/CashBalance';
+import PortfolioTreemap from '@/components/dashboard/PortfolioTreemap';
+import DashboardWatchlist from '@/components/dashboard/DashboardWatchlist';
 import EditHoldingModal from '@/components/holdings/EditHoldingModal';
 import SellModal from '@/components/holdings/SellModal';
 import { getAlertLevel, getStopLossPrice } from '@/lib/calculations';
@@ -89,11 +91,13 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
+            <PortfolioTreemap holdings={holdings} />
             <HoldingsTable
               holdings={holdings}
               onEdit={setEditTarget}
               onSell={h => setSellTarget(h)}
             />
+            <DashboardWatchlist />
             <NewsPanel />
           </>
         )}

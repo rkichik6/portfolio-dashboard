@@ -1,11 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { getMarketStatus, type MarketStatus } from '@/lib/marketStatus';
 
 export default function Header() {
   const [fxRate, setFxRate] = useState<number | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
+  const [marketStatus, setMarketStatus] = useState<MarketStatus>(getMarketStatus());
 
   async function fetchFx() {
     try {
@@ -25,8 +27,12 @@ export default function Header() {
 
   useEffect(() => {
     fetchFx();
-    const interval = setInterval(fetchFx, 15 * 60 * 1000);
-    return () => clearInterval(interval);
+    const fxInterval = setInterval(fetchFx, 15 * 60 * 1000);
+    const statusInterval = setInterval(() => setMarketStatus(getMarketStatus()), 60 * 1000);
+    return () => {
+      clearInterval(fxInterval);
+      clearInterval(statusInterval);
+    };
   }, []);
 
   return (
@@ -45,6 +51,17 @@ export default function Header() {
       </span>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <span style={{
+          fontSize: 10,
+          fontWeight: 700,
+          color: marketStatus.color,
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          border: `1px solid ${marketStatus.color}`,
+          padding: '2px 6px',
+        }}>
+          {marketStatus.label}
+        </span>
         {fxRate && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>USD/MXN</span>

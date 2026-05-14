@@ -1,8 +1,8 @@
 const convictionConfig = {
-  'very-high': { label: 'Very High', color: 'var(--accent2)', border: 'rgba(34,197,94,0.3)' },
-  'high':      { label: 'High',      color: 'var(--accent)',  border: 'rgba(59,130,246,0.3)' },
-  'medium':    { label: 'Medium',    color: 'var(--warning)', border: 'rgba(245,158,11,0.3)' },
-  'speculative':{ label: 'Spec',     color: 'var(--danger)',  border: 'rgba(239,68,68,0.3)'  },
+  'very-high':   { label: 'V.HIGH', color: '#ff8c00' },
+  'high':        { label: 'HIGH',   color: '#888888' },
+  'medium':      { label: 'MED',    color: '#888888' },
+  'speculative': { label: 'SPEC',   color: '#555555' },
 };
 
 interface ConvictionBadgeProps {
@@ -11,9 +11,9 @@ interface ConvictionBadgeProps {
 
 export default function ConvictionBadge({ conviction }: ConvictionBadgeProps) {
   const cfg = convictionConfig[conviction as keyof typeof convictionConfig]
-    ?? { label: conviction, color: 'var(--muted)', border: 'var(--border)' };
+    ?? { label: conviction.toUpperCase(), color: '#555555' };
   return (
-    <span className="badge" style={{ color: cfg.color, borderColor: cfg.border }}>
+    <span className="badge" style={{ color: cfg.color, borderColor: cfg.color }}>
       {cfg.label}
     </span>
   );

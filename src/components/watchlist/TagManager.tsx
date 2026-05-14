@@ -8,12 +8,12 @@ interface Tag {
   color: string;
 }
 
-const PRESET_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#a78bfa', '#f97316', '#ec4899', '#06b6d4'];
+const PRESET_COLORS = ['#ff8c00', '#00c853', '#ff1744', '#888888', '#a78bfa', '#f97316', '#06b6d4', '#555555'];
 
 export default function TagManager() {
   const [tags, setTags] = useState<Tag[]>([]);
   const [newName, setNewName] = useState('');
-  const [newColor, setNewColor] = useState('#3b82f6');
+  const [newColor, setNewColor] = useState('#ff8c00');
   const [saving, setSaving] = useState(false);
 
   async function load() {
@@ -27,68 +27,60 @@ export default function TagManager() {
   async function handleAdd() {
     if (!newName.trim()) return;
     setSaving(true);
-    await fetch('/api/tags', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newName.trim(), color: newColor }),
-    });
+    await fetch('/api/tags', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: newName.trim(), color: newColor }) });
     setNewName('');
     await load();
     setSaving(false);
   }
 
   async function handleDelete(id: number) {
-    await fetch('/api/tags', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
+    await fetch('/api/tags', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     await load();
   }
 
   return (
-    <div className="card">
-      <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1rem' }}>Tag Manager</div>
-
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1rem' }}>
-        {tags.map(tag => (
-          <div key={tag.id} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.5rem', border: `1px solid ${tag.color}`, background: 'transparent' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: tag.color, display: 'inline-block' }} />
-            <span style={{ fontSize: '0.75rem', color: tag.color }}>{tag.name}</span>
-            <button onClick={() => handleDelete(tag.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', display: 'flex', padding: 0 }}>
-              <Trash2 size={10} />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <input
-          className="form-input"
-          style={{ flex: 1, minWidth: 120 }}
-          value={newName}
-          onChange={e => setNewName(e.target.value)}
-          placeholder="New tag name"
-          onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-        />
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          {PRESET_COLORS.map(c => (
-            <button
-              key={c}
-              onClick={() => setNewColor(c)}
-              style={{
-                width: 18, height: 18,
-                background: c,
-                border: newColor === c ? '2px solid var(--text)' : '2px solid transparent',
-                cursor: 'pointer',
-                padding: 0,
-              }}
-            />
+    <div style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
+      <div className="section-header">TAG MANAGER</div>
+      <div style={{ padding: 12 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
+          {tags.map(tag => (
+            <div key={tag.id} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 6px', border: `1px solid ${tag.color}` }}>
+              <span style={{ width: 6, height: 6, background: tag.color, display: 'inline-block', flexShrink: 0 }} />
+              <span style={{ fontSize: 10, color: tag.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{tag.name}</span>
+              <button onClick={() => handleDelete(tag.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', display: 'flex', padding: 0, marginLeft: 2 }}>
+                <Trash2 size={9} />
+              </button>
+            </div>
           ))}
         </div>
-        <button className="btn btn-primary" onClick={handleAdd} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <Plus size={12} /> Add
-        </button>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            className="form-input"
+            style={{ flex: 1, minWidth: 100 }}
+            value={newName}
+            onChange={e => setNewName(e.target.value)}
+            placeholder="Tag name"
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+          />
+          <div style={{ display: 'flex', gap: 3 }}>
+            {PRESET_COLORS.map(c => (
+              <button
+                key={c}
+                onClick={() => setNewColor(c)}
+                style={{
+                  width: 16, height: 16,
+                  background: c,
+                  border: newColor === c ? '2px solid var(--text)' : '2px solid transparent',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              />
+            ))}
+          </div>
+          <button className="btn btn-primary" onClick={handleAdd} disabled={saving} style={{ padding: '4px 8px' }}>
+            <Plus size={9} /> ADD
+          </button>
+        </div>
       </div>
     </div>
   );

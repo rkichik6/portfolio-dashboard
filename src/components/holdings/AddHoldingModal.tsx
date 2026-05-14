@@ -5,11 +5,7 @@ import { X } from 'lucide-react';
 interface AddHoldingModalProps {
   onClose: () => void;
   onSaved: () => void;
-  initial?: Partial<{
-    ticker: string;
-    name: string;
-    entry_price_mxn: number;
-  }>;
+  initial?: Partial<{ ticker: string; name: string; entry_price_mxn: number }>;
 }
 
 const CONVICTION_OPTIONS = [
@@ -42,7 +38,7 @@ export default function AddHoldingModal({ onClose, onSaved, initial }: AddHoldin
 
   async function handleSave() {
     if (!ticker || !name || !shares || !entryPrice || !entryDate) {
-      setError('All fields except thesis are required.');
+      setError('ALL FIELDS EXCEPT THESIS ARE REQUIRED.');
       return;
     }
     setSaving(true);
@@ -51,23 +47,14 @@ export default function AddHoldingModal({ onClose, onSaved, initial }: AddHoldin
       const res = await fetch('/api/holdings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticker: ticker.toUpperCase(),
-          name,
-          shares: parseFloat(shares),
-          entry_price_mxn: parseFloat(entryPrice),
-          entry_date: entryDate,
-          bucket,
-          conviction,
-          thesis: thesis || null,
-        }),
+        body: JSON.stringify({ ticker: ticker.toUpperCase(), name, shares: parseFloat(shares), entry_price_mxn: parseFloat(entryPrice), entry_date: entryDate, bucket, conviction, thesis: thesis || null }),
       });
       if (!res.ok) throw new Error('Failed');
       window.dispatchEvent(new Event('cash-update'));
       onSaved();
       onClose();
     } catch {
-      setError('Failed to save holding. Try again.');
+      setError('FAILED TO SAVE HOLDING.');
     } finally {
       setSaving(false);
     }
@@ -77,19 +64,19 @@ export default function AddHoldingModal({ onClose, onSaved, initial }: AddHoldin
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>Add Holding</h3>
-          <button className="btn" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}><X size={14} /></button>
+          <h3>ADD HOLDING</h3>
+          <button className="btn" style={{ padding: '2px 6px', borderColor: 'var(--border2)' }} onClick={onClose}><X size={12} /></button>
         </div>
         <div className="modal-body">
-          {error && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+          {error && <div style={{ color: 'var(--negative)', fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>{error}</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
             <div className="form-group">
               <label className="form-label">Ticker</label>
               <input className="form-input" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} onBlur={fetchName} placeholder="PLTR" />
             </div>
             <div className="form-group">
               <label className="form-label">Company Name</label>
-              <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="Auto-fetched or type manually" />
+              <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="Auto-fetched on blur" />
             </div>
             <div className="form-group">
               <label className="form-label">Shares</label>
@@ -123,9 +110,9 @@ export default function AddHoldingModal({ onClose, onSaved, initial }: AddHoldin
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn" onClick={onClose}>CANCEL</button>
           <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Add Holding'}
+            {saving ? 'SAVING...' : 'ADD HOLDING'}
           </button>
         </div>
       </div>

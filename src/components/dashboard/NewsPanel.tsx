@@ -14,11 +14,10 @@ interface NewsArticle {
 }
 
 type Tab = 'portfolio' | 'watchlist' | 'universe';
-
 const tabs: { key: Tab; label: string }[] = [
-  { key: 'portfolio', label: 'Portfolio' },
-  { key: 'watchlist', label: 'Watchlist' },
-  { key: 'universe', label: 'Universe' },
+  { key: 'portfolio', label: 'PORTFOLIO' },
+  { key: 'watchlist', label: 'WATCHLIST' },
+  { key: 'universe', label: 'UNIVERSE' },
 ];
 
 export default function NewsPanel() {
@@ -42,67 +41,65 @@ export default function NewsPanel() {
   useEffect(() => { fetchNews(active); }, [active]);
 
   return (
-    <div className="card" style={{ padding: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ padding: '0.75rem 1rem', borderRight: '1px solid var(--border)', flexShrink: 0 }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>News</span>
+    <div style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
+      {/* Section header + tabs */}
+      <div style={{ display: 'flex', background: 'var(--accent-bg)', borderTop: '1px solid var(--accent)', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ padding: '0 12px', height: 24, display: 'flex', alignItems: 'center', fontSize: 11, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.12em', borderRight: '1px solid var(--border)', flexShrink: 0 }}>
+          NEWS
         </div>
         {tabs.map(t => (
           <button
             key={t.key}
             onClick={() => setActive(t.key)}
             style={{
-              padding: '0.75rem 1rem',
-              background: 'transparent',
+              padding: '0 12px',
+              height: 24,
+              background: active === t.key ? 'var(--accent)' : 'transparent',
               border: 'none',
-              borderBottom: active === t.key ? '2px solid var(--accent)' : '2px solid transparent',
-              color: active === t.key ? 'var(--text)' : 'var(--text-dim)',
-              fontSize: '0.8125rem',
-              fontWeight: active === t.key ? 500 : 400,
+              borderRight: '1px solid var(--border)',
+              color: active === t.key ? '#000' : 'var(--text-dim)',
+              fontSize: 10,
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
               cursor: 'pointer',
-              marginBottom: -1,
-              transition: 'color 0.1s',
             }}
           >
             {t.label}
           </button>
         ))}
       </div>
-      <div style={{ padding: '0.75rem 1rem', minHeight: 200 }}>
+
+      {/* Article list */}
+      <div style={{ minHeight: 160 }}>
         {loading && (
-          <div style={{ color: 'var(--text-dim)', fontSize: '0.8125rem', textAlign: 'center', padding: '2rem' }}>
-            Loading news…
+          <div style={{ padding: 16, fontSize: 11, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>
+            FETCHING NEWS...
           </div>
         )}
         {!loading && articles.length === 0 && (
-          <div style={{ color: 'var(--muted)', fontSize: '0.8125rem', textAlign: 'center', padding: '2rem' }}>
-            No recent news available.
+          <div style={{ padding: 16, fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>
+            NO RECENT NEWS
           </div>
         )}
         {!loading && articles.map((a, i) => (
-          <div key={i} style={{ padding: '0.75rem 0', borderBottom: i < articles.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem' }}>
-              <span className="badge" style={{ color: 'var(--accent)', borderColor: 'rgba(59,130,246,0.3)', flexShrink: 0, marginTop: 2, fontFamily: 'var(--font-mono)' }}>
-                {a.ticker}
-              </span>
-              <div style={{ flex: 1 }}>
-                <a
-                  href={a.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'var(--text)', fontSize: '0.875rem', textDecoration: 'none', lineHeight: 1.5, display: 'flex', alignItems: 'flex-start', gap: '0.3rem' }}
-                >
-                  {a.headline}
-                  <ExternalLink size={11} style={{ flexShrink: 0, marginTop: 3, color: 'var(--text-dim)' }} />
-                </a>
-                {a.summary && (
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '0.3rem', lineHeight: 1.5 }}>
-                    {a.summary.slice(0, 150)}{a.summary.length > 150 ? '…' : ''}
-                  </div>
-                )}
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--muted)', marginTop: '0.3rem' }}>
-                  {a.source} · {a.datetime ? format(new Date(a.datetime * 1000), 'MMM d, yyyy') : ''}
-                </div>
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 12px', borderBottom: i < articles.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <span className="badge" style={{ color: 'var(--accent)', borderColor: 'var(--accent)', flexShrink: 0, marginTop: 2 }}>
+              {a.ticker}
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <a
+                href={a.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--text)', fontSize: 12, textDecoration: 'none', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: 4 }}
+              >
+                <span>{a.headline}</span>
+                <ExternalLink size={10} style={{ flexShrink: 0, marginTop: 3, color: 'var(--text-dim)' }} />
+              </a>
+              <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {a.source} &nbsp;·&nbsp; {a.datetime ? format(new Date(a.datetime * 1000), 'MMM d, yyyy') : ''}
               </div>
             </div>
           </div>

@@ -33,26 +33,20 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
   }
 
   async function handleSave() {
-    if (!ticker || !name) { setError('Ticker and name are required.'); return; }
+    if (!ticker || !name) { setError('TICKER AND NAME REQUIRED.'); return; }
     setSaving(true);
     setError('');
     try {
       const res = await fetch('/api/watchlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticker: ticker.toUpperCase(),
-          name,
-          target_price_mxn: targetPrice ? parseFloat(targetPrice) : null,
-          notes: notes || null,
-          tag_ids: selectedTags,
-        }),
+        body: JSON.stringify({ ticker: ticker.toUpperCase(), name, target_price_mxn: targetPrice ? parseFloat(targetPrice) : null, notes: notes || null, tag_ids: selectedTags }),
       });
       if (!res.ok) throw new Error('Failed');
       onSaved();
       onClose();
     } catch {
-      setError('Failed to add to watchlist.');
+      setError('FAILED TO ADD TO WATCHLIST.');
     } finally {
       setSaving(false);
     }
@@ -62,12 +56,12 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>Add to Watchlist</h3>
-          <button className="btn" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}><X size={14} /></button>
+          <h3>ADD TO WATCHLIST</h3>
+          <button className="btn" style={{ padding: '2px 6px', borderColor: 'var(--border2)' }} onClick={onClose}><X size={12} /></button>
         </div>
         <div className="modal-body">
-          {error && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+          {error && <div style={{ color: 'var(--negative)', fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>{error}</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
             <div className="form-group">
               <label className="form-label">Ticker</label>
               <input className="form-input" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} placeholder="TSM" />
@@ -88,17 +82,18 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
           {tags.length > 0 && (
             <div className="form-group">
               <label className="form-label">Tags</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                 {tags.map(tag => (
                   <button
                     key={tag.id}
                     onClick={() => toggleTag(tag.id)}
                     className="badge"
                     style={{
-                      color: selectedTags.includes(tag.id) ? 'var(--bg)' : tag.color,
+                      color: selectedTags.includes(tag.id) ? '#000' : tag.color,
                       borderColor: tag.color,
                       background: selectedTags.includes(tag.id) ? tag.color : 'transparent',
                       cursor: 'pointer',
+                      padding: '2px 8px',
                     }}
                   >
                     {tag.name}
@@ -109,9 +104,9 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
           )}
         </div>
         <div className="modal-footer">
-          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn" onClick={onClose}>CANCEL</button>
           <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Add to Watchlist'}
+            {saving ? 'SAVING...' : 'ADD TO WATCHLIST'}
           </button>
         </div>
       </div>

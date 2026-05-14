@@ -31,29 +31,25 @@ export default function HoldingsPage() {
   const totalPnl = holdings.reduce((s, h) => s + h.pnl_mxn, 0);
 
   return (
-    <div style={{ padding: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Holdings</h1>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
-            {holdings.length} positions · {totalPnl >= 0 ? '+' : ''}{(totalPnl / Math.max(1, totalValue - totalPnl) * 100).toFixed(2)}% total return
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>HOLDINGS</div>
+          <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            {holdings.length} POSITIONS &nbsp;·&nbsp; {totalPnl >= 0 ? '+' : ''}{(totalPnl / Math.max(1, totalValue - totalPnl) * 100).toFixed(2)}% TOTAL RETURN
           </div>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Plus size={13} /> Add Holding
+        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+          <Plus size={10} /> ADD HOLDING
         </button>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', fontSize: '0.8125rem', color: 'var(--text-dim)' }}>
-          Loading…
+        <div style={{ textAlign: 'center', padding: '2rem', fontSize: 11, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          LOADING...
         </div>
       ) : (
-        <HoldingsTable
-          holdings={holdings}
-          onEdit={setEditTarget}
-          onSell={setSellTarget}
-        />
+        <HoldingsTable holdings={holdings} onEdit={setEditTarget} onSell={setSellTarget} />
       )}
 
       {showAdd && <AddHoldingModal onClose={() => setShowAdd(false)} onSaved={load} />}

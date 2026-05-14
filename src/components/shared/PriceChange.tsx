@@ -7,7 +7,7 @@ interface PriceChangeProps {
 export default function PriceChange({ value, suffix = '%', decimals = 2 }: PriceChangeProps) {
   const positive = value >= 0;
   return (
-    <span className="number" style={{ color: positive ? 'var(--accent2)' : 'var(--danger)', fontFamily: 'var(--font-mono)' }}>
+    <span style={{ color: positive ? 'var(--positive)' : 'var(--negative)', fontWeight: 600 }}>
       {positive ? '+' : ''}{value.toFixed(decimals)}{suffix}
     </span>
   );

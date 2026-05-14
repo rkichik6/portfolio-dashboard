@@ -23,29 +23,21 @@ export default function SellModal({ holding, onClose, onSold }: SellModalProps) 
     : 0;
 
   async function handleSell() {
-    if (!sellPrice || !sellDate) {
-      setError('Sell price and date are required.');
-      return;
-    }
+    if (!sellPrice || !sellDate) { setError('SELL PRICE AND DATE REQUIRED.'); return; }
     setSaving(true);
     setError('');
     try {
       const res = await fetch('/api/holdings', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: holding.id,
-          sell_price_mxn: parseFloat(sellPrice),
-          sell_date: sellDate,
-          notes: notes || null,
-        }),
+        body: JSON.stringify({ id: holding.id, sell_price_mxn: parseFloat(sellPrice), sell_date: sellDate, notes: notes || null }),
       });
       if (!res.ok) throw new Error('Failed');
       window.dispatchEvent(new Event('cash-update'));
       onSold();
       onClose();
     } catch {
-      setError('Failed to process sale.');
+      setError('FAILED TO PROCESS SALE.');
     } finally {
       setSaving(false);
     }
@@ -57,32 +49,27 @@ export default function SellModal({ holding, onClose, onSold }: SellModalProps) 
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>Sell <span style={{ fontFamily: 'var(--font-mono)' }}>{holding.ticker}</span></h3>
-          <button className="btn" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}><X size={14} /></button>
+          <h3>SELL {holding.ticker}</h3>
+          <button className="btn" style={{ padding: '2px 6px', borderColor: 'var(--border2)' }} onClick={onClose}><X size={12} /></button>
         </div>
         <div className="modal-body">
-          {error && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</div>}
+          {error && <div style={{ color: 'var(--negative)', fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>{error}</div>}
 
-          <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', padding: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', fontSize: '0.78rem' }}>
-              <div>
-                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>Shares</div>
-                <div style={{ fontFamily: 'var(--font-mono)' }}>{holding.shares}</div>
+          {/* Position summary */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'var(--border)', marginBottom: 12 }}>
+            {[
+              { label: 'Shares', value: String(holding.shares), color: 'var(--text)' },
+              { label: 'Entry', value: formatMxn(holding.entry_price_mxn), color: 'var(--text)' },
+              { label: 'P&L Preview', value: `${pnlPos ? '+' : ''}${formatMxn(previewPnl)}`, color: pnlPos ? 'var(--positive)' : 'var(--negative)' },
+            ].map(item => (
+              <div key={item.label} style={{ background: 'var(--surface2)', padding: '8px 10px' }}>
+                <div style={{ fontSize: 9, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>{item.label}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: item.color }}>{item.value}</div>
               </div>
-              <div>
-                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>Entry</div>
-                <div style={{ fontFamily: 'var(--font-mono)' }}>{formatMxn(holding.entry_price_mxn)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>Realized P&L</div>
-                <div style={{ fontFamily: 'var(--font-mono)', color: pnlPos ? 'var(--accent2)' : 'var(--danger)' }}>
-                  {pnlPos ? '+' : ''}{formatMxn(previewPnl)} ({pnlPos ? '+' : ''}{previewPct.toFixed(2)}%)
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
             <div className="form-group">
               <label className="form-label">Sell Price (MXN)</label>
               <input className="form-input" type="number" value={sellPrice} onChange={e => setSellPrice(e.target.value)} />
@@ -98,9 +85,9 @@ export default function SellModal({ holding, onClose, onSold }: SellModalProps) 
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn" onClick={onClose}>CANCEL</button>
           <button className="btn btn-danger" onClick={handleSell} disabled={saving}>
-            {saving ? 'Processing...' : 'Confirm Sell'}
+            {saving ? 'PROCESSING...' : 'CONFIRM SELL'}
           </button>
         </div>
       </div>

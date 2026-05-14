@@ -49,16 +49,16 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
   });
 
   return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-      <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Holdings</span>
-        <span className="badge" style={{ color: 'var(--accent)', borderColor: 'var(--accent)' }}>{holdings.length}</span>
+    <div style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
+      <div className="section-header" style={{ justifyContent: 'space-between' }}>
+        <span>HOLDINGS</span>
+        <span style={{ color: 'var(--text-dim)' }}>[{holdings.length}]</span>
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table className="data-table">
           <thead>
             <tr>
-              <th style={{ width: 24 }}></th>
+              <th style={{ width: 20 }}></th>
               <th>Ticker</th>
               <th>Bucket</th>
               <th className="right">Shares</th>
@@ -67,8 +67,8 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
               <th className="right">Day %</th>
               <th className="right">P&L</th>
               <th className="right">Value</th>
-              <th>Stop Loss</th>
-              <th>Conviction</th>
+              <th>Stop</th>
+              <th>Conv</th>
               <th></th>
             </tr>
           </thead>
@@ -80,35 +80,35 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
               return (
                 <React.Fragment key={h.id}>
                   <tr style={{ cursor: 'pointer' }} onClick={() => toggle(h.id)}>
-                    <td style={{ width: 24, paddingRight: 0 }}>
-                      {open ? <ChevronDown size={12} color="var(--text-dim)" /> : <ChevronRight size={12} color="var(--text-dim)" />}
+                    <td style={{ width: 20, paddingRight: 0, color: 'var(--text-dim)' }}>
+                      {open ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
                     </td>
                     <td>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent)', fontSize: '0.82rem' }}>{h.ticker}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>{h.name}</div>
-                      {h.price_stale && <div style={{ fontSize: '0.65rem', color: 'var(--warning)' }}>Delayed</div>}
+                      <div style={{ color: 'var(--text-ticker)', fontWeight: 700, fontSize: 13 }}>{h.ticker}</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 1 }}>{h.name}</div>
+                      {h.price_stale && <div style={{ fontSize: 9, color: 'var(--accent)', textTransform: 'uppercase' }}>DELAYED</div>}
                     </td>
                     <td>
                       <span className="badge" style={{
-                        color: h.bucket === 'core' ? 'var(--accent)' : 'var(--warning)',
-                        borderColor: h.bucket === 'core' ? 'rgba(59,130,246,0.3)' : 'rgba(245,158,11,0.3)',
+                        color: h.bucket === 'core' ? 'var(--accent)' : 'var(--text-dim)',
+                        borderColor: h.bucket === 'core' ? 'var(--accent)' : 'var(--text-dim)',
                       }}>
                         {h.bucket}
                       </span>
                     </td>
-                    <td className="number right">{h.shares}</td>
-                    <td className="number right" style={{ fontSize: '0.82rem' }}>{formatMxn(h.entry_price_mxn)}</td>
-                    <td className="number right" style={{ fontSize: '0.82rem' }}>{formatMxn(h.current_price_mxn)}</td>
+                    <td className="right">{h.shares}</td>
+                    <td className="right">{formatMxn(h.entry_price_mxn)}</td>
+                    <td className="right">{formatMxn(h.current_price_mxn)}</td>
                     <td className="right"><PriceChange value={h.change_pct} /></td>
                     <td className="right">
-                      <div style={{ fontFamily: 'var(--font-mono)', color: pnlPos ? 'var(--accent2)' : 'var(--danger)', fontSize: '0.82rem' }}>
+                      <div style={{ color: pnlPos ? 'var(--positive)' : 'var(--negative)', fontWeight: 600 }}>
                         {pnlPos ? '+' : ''}{h.pnl_pct.toFixed(2)}%
                       </div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: pnlPos ? 'var(--accent2)' : 'var(--danger)' }}>
+                      <div style={{ fontSize: 10, color: pnlPos ? 'var(--positive)' : 'var(--negative)' }}>
                         {pnlPos ? '+' : ''}{formatMxn(h.pnl_mxn)}
                       </div>
                     </td>
-                    <td className="number right" style={{ fontSize: '0.82rem' }}>{formatMxn(h.total_value_mxn)}</td>
+                    <td className="right">{formatMxn(h.total_value_mxn)}</td>
                     <td>
                       <StopLossBar
                         entryPrice={h.entry_price_mxn}
@@ -118,34 +118,34 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
                     </td>
                     <td><ConvictionBadge conviction={h.conviction} /></td>
                     <td onClick={e => e.stopPropagation()}>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn" style={{ padding: '0.25rem 0.5rem' }} onClick={() => onEdit(h)} title="Edit">
-                          <Edit2 size={11} />
+                      <div style={{ display: 'flex', gap: 3 }}>
+                        <button className="btn" style={{ padding: '2px 5px' }} onClick={() => onEdit(h)} title="Edit">
+                          <Edit2 size={9} />
                         </button>
-                        <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem' }} onClick={() => onSell(h)} title="Sell">
-                          <TrendingDown size={11} />
+                        <button className="btn btn-danger" style={{ padding: '2px 5px' }} onClick={() => onSell(h)} title="Sell">
+                          <TrendingDown size={9} />
                         </button>
                       </div>
                     </td>
                   </tr>
                   {open && (
                     <tr>
-                      <td colSpan={12} style={{ background: 'var(--surface2)', padding: '0.75rem 1.5rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <td colSpan={12} style={{ background: 'var(--surface2)', padding: '10px 16px', borderTop: '1px solid var(--border)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem' }}>
                           <div>
-                            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.3rem' }}>Thesis</div>
-                            <div style={{ fontSize: '0.8125rem', color: 'var(--text)', lineHeight: 1.6 }}>{h.thesis ?? 'No thesis recorded.'}</div>
+                            <div style={{ fontSize: 9, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>THESIS</div>
+                            <div style={{ fontSize: 11, color: 'var(--text)', lineHeight: 1.5 }}>{h.thesis ?? 'No thesis recorded.'}</div>
                           </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: 11 }}>
                             {[
-                              { label: 'Entry Date', value: h.entry_date, mono: true },
-                              { label: 'Stop Loss', value: formatMxn(h.stop_loss_price), mono: true, danger: true },
-                              { label: 'Total Cost', value: formatMxn(h.entry_price_mxn * h.shares), mono: true },
-                              { label: 'Current Value', value: formatMxn(h.total_value_mxn), mono: true },
+                              { label: 'Entry Date', value: h.entry_date, color: 'var(--text)' },
+                              { label: 'Stop Loss', value: formatMxn(h.stop_loss_price), color: 'var(--negative)' },
+                              { label: 'Total Cost', value: formatMxn(h.entry_price_mxn * h.shares), color: 'var(--text)' },
+                              { label: 'Current Value', value: formatMxn(h.total_value_mxn), color: 'var(--text)' },
                             ].map(item => (
                               <div key={item.label}>
-                                <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.2rem' }}>{item.label}</div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: item.danger ? 'var(--danger)' : 'var(--text)' }}>{item.value}</div>
+                                <div style={{ fontSize: 9, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 }}>{item.label}</div>
+                                <div style={{ color: item.color, fontWeight: 600 }}>{item.value}</div>
                               </div>
                             ))}
                           </div>

@@ -54,57 +54,47 @@ export default function TradesPage() {
   const pnlPos = summary.total_realized_pnl >= 0;
 
   return (
-    <div style={{ padding: '1.5rem' }}>
-      <h1 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.25rem' }}>Trade Log</h1>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.25rem' }}>
+    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Summary stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', border: '1px solid var(--border)', background: 'var(--surface)' }}>
         {[
-          { label: 'Realized P&L', value: `${pnlPos ? '+' : ''}${formatMxn(summary.total_realized_pnl)}`, color: pnlPos ? 'var(--accent2)' : 'var(--danger)' },
+          { label: 'Realized P&L', value: `${pnlPos ? '+' : ''}${formatMxn(summary.total_realized_pnl)}`, color: pnlPos ? 'var(--positive)' : 'var(--negative)' },
           { label: 'Total Trades', value: summary.total_trades.toString(), color: 'var(--text)' },
-          { label: 'Win Rate', value: `${summary.win_rate}%`, color: summary.win_rate >= 50 ? 'var(--accent2)' : 'var(--danger)' },
+          { label: 'Win Rate', value: `${summary.win_rate}%`, color: summary.win_rate >= 50 ? 'var(--positive)' : 'var(--negative)' },
         ].map((s, i) => (
-          <div key={i} className="card">
-            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>{s.label}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: s.color, fontWeight: 700 }}>{s.value}</div>
+          <div key={i} style={{ borderRight: i < 2 ? '1px solid var(--border)' : 'none' }}>
+            <div className="section-header">{s.label.toUpperCase()}</div>
+            <div style={{ padding: '8px 12px', fontSize: 18, fontWeight: 600, color: s.color }}>
+              {s.value}
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <input
           className="form-input"
-          style={{ width: 120 }}
-          placeholder="Ticker filter"
+          style={{ width: 110 }}
+          placeholder="TICKER"
           value={filterTicker}
           onChange={e => setFilterTicker(e.target.value.toUpperCase())}
         />
-        <select className="form-select" style={{ width: 120 }} value={filterAction} onChange={e => setFilterAction(e.target.value)}>
-          <option value="">All actions</option>
+        <select className="form-select" style={{ width: 110 }} value={filterAction} onChange={e => setFilterAction(e.target.value)}>
+          <option value="">ALL ACTIONS</option>
           <option value="BUY">BUY</option>
           <option value="SELL">SELL</option>
         </select>
-        <input
-          className="form-input"
-          style={{ width: 150 }}
-          type="date"
-          placeholder="From"
-          value={filterFrom}
-          onChange={e => setFilterFrom(e.target.value)}
-        />
-        <input
-          className="form-input"
-          style={{ width: 150 }}
-          type="date"
-          placeholder="To"
-          value={filterTo}
-          onChange={e => setFilterTo(e.target.value)}
-        />
+        <input className="form-input" style={{ width: 140 }} type="date" value={filterFrom} onChange={e => setFilterFrom(e.target.value)} />
+        <input className="form-input" style={{ width: 140 }} type="date" value={filterTo} onChange={e => setFilterTo(e.target.value)} />
         <button className="btn" onClick={() => { setFilterTicker(''); setFilterAction(''); setFilterFrom(''); setFilterTo(''); }}>
-          Clear
+          CLEAR
         </button>
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      {/* Table */}
+      <div style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
+        <div className="section-header">TRADE LOG</div>
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table">
             <thead>
@@ -112,56 +102,48 @@ export default function TradesPage() {
                 <th>Date</th>
                 <th>Ticker</th>
                 <th>Action</th>
-                <th>Shares</th>
-                <th>Price (MXN)</th>
-                <th>Total (MXN)</th>
-                <th>Realized P&L</th>
+                <th className="right">Shares</th>
+                <th className="right">Price</th>
+                <th className="right">Total</th>
+                <th className="right">P&L</th>
                 <th>Notes</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
-                    Loading...
-                  </td>
-                </tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>LOADING...</td></tr>
               )}
               {!loading && trades.length === 0 && (
-                <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '2rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
-                    No trades found.
-                  </td>
-                </tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>NO TRADES FOUND</td></tr>
               )}
               {!loading && trades.map(t => (
                 <tr key={t.id}>
-                  <td className="number" style={{ fontSize: '0.8rem' }}>{t.date}</td>
+                  <td>{t.date}</td>
                   <td>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent)', fontSize: '0.82rem' }}>{t.ticker}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{t.name}</div>
+                    <div style={{ color: 'var(--text-ticker)', fontWeight: 700, fontSize: 13 }}>{t.ticker}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>{t.name}</div>
                   </td>
                   <td>
                     <span className="badge" style={{
-                      color: t.action === 'BUY' ? 'var(--accent2)' : 'var(--danger)',
-                      borderColor: t.action === 'BUY' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)',
+                      color: t.action === 'BUY' ? 'var(--positive)' : 'var(--negative)',
+                      borderColor: t.action === 'BUY' ? 'var(--positive)' : 'var(--negative)',
                     }}>
                       {t.action}
                     </span>
                   </td>
-                  <td className="number">{t.shares}</td>
-                  <td className="number">{formatMxn(t.price_mxn)}</td>
-                  <td className="number">{formatMxn(t.total_mxn)}</td>
-                  <td>
+                  <td className="right">{t.shares}</td>
+                  <td className="right">{formatMxn(t.price_mxn)}</td>
+                  <td className="right">{formatMxn(t.total_mxn)}</td>
+                  <td className="right">
                     {t.realized_pnl_mxn != null ? (
-                      <span className="number" style={{ color: t.realized_pnl_mxn >= 0 ? 'var(--accent2)' : 'var(--danger)' }}>
+                      <span style={{ color: t.realized_pnl_mxn >= 0 ? 'var(--positive)' : 'var(--negative)', fontWeight: 600 }}>
                         {t.realized_pnl_mxn >= 0 ? '+' : ''}{formatMxn(t.realized_pnl_mxn)}
                       </span>
                     ) : (
-                      <span style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>—</span>
+                      <span style={{ color: 'var(--muted)' }}>—</span>
                     )}
                   </td>
-                  <td style={{ fontSize: '0.78rem', color: 'var(--text-dim)', maxWidth: 200 }}>{t.notes ?? '—'}</td>
+                  <td style={{ fontSize: 11, color: 'var(--text-dim)', maxWidth: 200 }}>{t.notes ?? '—'}</td>
                 </tr>
               ))}
             </tbody>

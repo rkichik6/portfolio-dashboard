@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { RefreshCw, Activity } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 export default function Header() {
   const [fxRate, setFxRate] = useState<number | null>(null);
@@ -13,9 +13,7 @@ export default function Header() {
       const data = await res.json() as { rate: number };
       setFxRate(data.rate);
       setLastUpdate(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }
 
   async function handleRefresh() {
@@ -33,32 +31,31 @@ export default function Header() {
 
   return (
     <header style={{
-      background: 'var(--surface)',
+      background: 'var(--bg)',
       borderBottom: '1px solid var(--border)',
-      padding: '0 1.5rem',
-      height: 48,
+      height: 40,
+      padding: '0 16px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       flexShrink: 0,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <Activity size={15} color="var(--accent)" />
-        <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text)', letterSpacing: '-0.01em' }}>RK Portfolio</span>
-      </div>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+        RK PORTFOLIO
+      </span>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
         {fxRate && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>USD/MXN</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text)', fontWeight: 700 }}>{fxRate.toFixed(2)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>USD/MXN</span>
+            <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 600 }}>{fxRate.toFixed(2)}</span>
           </div>
         )}
         {lastUpdate && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-dim)' }}>{lastUpdate}</span>
+          <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{lastUpdate}</span>
         )}
-        <button onClick={handleRefresh} className="btn">
-          <RefreshCw size={12} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
+        <button onClick={handleRefresh} className="btn" style={{ padding: '3px 8px' }}>
+          <RefreshCw size={10} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
           Refresh
         </button>
       </div>

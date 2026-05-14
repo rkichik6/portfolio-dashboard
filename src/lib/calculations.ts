@@ -37,9 +37,9 @@ export function getAlertLevel(distanceToStop: number): 'none' | 'warning' | 'dan
 }
 
 export function getStopBarColor(distancePct: number): string {
-  if (distancePct < 5) return '#ff3d5a';
-  if (distancePct < 10) return '#ffb800';
-  return '#00ff9d';
+  if (distancePct < 5) return '#ff1744';
+  if (distancePct < 10) return '#ff8c00';
+  return '#00c853';
 }
 
 export function formatMxn(value: number): string {

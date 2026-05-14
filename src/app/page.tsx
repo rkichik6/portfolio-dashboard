@@ -64,7 +64,7 @@ export default function DashboardPage() {
     .filter(Boolean) as Alert[];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       <SummaryBar
         positionsValue={totalValue}
         cashBalance={cashAmount}
@@ -75,29 +75,27 @@ export default function DashboardPage() {
       />
 
       {alerts.length > 0 && (
-        <div style={{ padding: '0 1.5rem' }}>
+        <div style={{ padding: '0 16px', marginTop: 16 }}>
           <AlertsBanner alerts={alerts} />
         </div>
       )}
 
-      <div style={{ padding: '0 1.5rem 1.5rem' }}>
-        <div style={{ marginBottom: '1.25rem' }}>
-          <CashBalance onBalanceChange={setCashAmount} />
-        </div>
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <CashBalance onBalanceChange={setCashAmount} />
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '3rem', fontFamily: 'Space Mono, monospace', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-            Loading portfolio...
+          <div style={{ textAlign: 'center', padding: '2rem', fontSize: 11, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            LOADING PORTFOLIO...
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <>
             <HoldingsTable
               holdings={holdings}
               onEdit={setEditTarget}
               onSell={h => setSellTarget(h)}
             />
             <NewsPanel />
-          </div>
+          </>
         )}
       </div>
 

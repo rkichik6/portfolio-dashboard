@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { Check, Pencil, X, Wallet } from 'lucide-react';
+import { Check, Pencil, X } from 'lucide-react';
 
 interface CashData {
   amount: number;
@@ -26,9 +26,7 @@ export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
       const json = await res.json() as CashData;
       setData(json);
       onBalanceChange?.(json.amount);
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, [onBalanceChange]);
 
   useEffect(() => {
@@ -39,7 +37,7 @@ export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
   }, [load]);
 
   function startEdit() {
-    setInputValue(data?.initialized ? (data.amount.toFixed(2)) : '');
+    setInputValue(data?.initialized ? data.amount.toFixed(2) : '');
     setError('');
     setLastDeducted(null);
     setEditing(true);
@@ -54,7 +52,7 @@ export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
   async function handleSave() {
     const parsed = parseFloat(inputValue.replace(/[^0-9.-]/g, ''));
     if (isNaN(parsed) || parsed < 0) {
-      setError('Enter a valid positive amount in MXN');
+      setError('INVALID AMOUNT');
       return;
     }
     setSaving(true);
@@ -72,12 +70,10 @@ export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
       const json = await res.json() as CashData & { holdings_cost_deducted: number };
       setData(json);
       onBalanceChange?.(json.amount);
-      if (json.holdings_cost_deducted > 0) {
-        setLastDeducted(json.holdings_cost_deducted);
-      }
+      if (json.holdings_cost_deducted > 0) setLastDeducted(json.holdings_cost_deducted);
       setEditing(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Save failed.');
+      setError(e instanceof Error ? e.message : 'SAVE FAILED');
     } finally {
       setSaving(false);
     }
@@ -89,93 +85,70 @@ export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
   const isInit = data?.initialized === 1;
 
   return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
-      borderLeft: `2px solid ${isInit ? 'var(--accent2)' : 'var(--warning)'}`,
-    }}>
-      <div style={{
-        padding: '0.75rem 1.25rem',
-        borderBottom: editing || lastDeducted ? '1px solid var(--border)' : 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem',
-        flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Wallet size={15} color={isInit ? 'var(--accent2)' : 'var(--warning)'} />
-          <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.25rem' }}>
-              Cash Balance
-              {!isInit && <span style={{ marginLeft: '0.5rem', color: 'var(--warning)', fontWeight: 400 }}>— Not set</span>}
-            </div>
-            {!editing && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', fontWeight: 700, color: isInit ? 'var(--accent2)' : 'var(--muted)' }}>
-                {isInit ? fmt(data!.amount) : '—'}
-              </div>
-            )}
-            {!editing && data?.last_updated && isInit && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--muted)', marginTop: '0.2rem' }}>
-                Updated {new Date(data.last_updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+    <div style={{ border: '1px solid var(--border)', background: 'var(--surface)' }}>
+      {/* Section header */}
+      <div className="section-header" style={{ justifyContent: 'space-between' }}>
+        <span>CASH BALANCE{!isInit && <span style={{ color: 'var(--negative)', marginLeft: 8 }}>— NOT SET</span>}</span>
+        <div style={{ display: 'flex', gap: 4 }}>
           {!editing ? (
-            <button className="btn" onClick={startEdit}>
-              <Pencil size={11} />
-              {isInit ? 'Update' : 'Set Initial Balance'}
+            <button className="btn" style={{ padding: '2px 8px', height: 18, fontSize: 9 }} onClick={startEdit}>
+              <Pencil size={8} /> {isInit ? 'UPDATE' : 'SET BALANCE'}
             </button>
           ) : (
             <>
-              <button className="btn btn-success" onClick={handleSave} disabled={saving}>
-                <Check size={11} /> {saving ? 'Saving…' : 'Save'}
+              <button className="btn btn-success" style={{ padding: '2px 8px', height: 18, fontSize: 9 }} onClick={handleSave} disabled={saving}>
+                <Check size={8} /> {saving ? 'SAVING' : 'SAVE'}
               </button>
-              <button className="btn" onClick={cancelEdit}>
-                <X size={11} /> Cancel
+              <button className="btn" style={{ padding: '2px 8px', height: 18, fontSize: 9 }} onClick={cancelEdit}>
+                <X size={8} /> CANCEL
               </button>
             </>
           )}
         </div>
       </div>
 
-      {editing && (
-        <div style={{ padding: '0.75rem 1.25rem', borderBottom: lastDeducted ? '1px solid var(--border)' : 'none' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>
-            {isInit
-              ? 'Enter new balance in MXN — overwrites current value'
-              : 'Enter total cash before buying open positions — existing holdings will be deducted automatically'}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: 'var(--text-dim)' }}>MXN</span>
-            <input
-              className="form-input"
-              style={{ width: 200 }}
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') cancelEdit(); }}
-              placeholder="e.g. 50000"
-              autoFocus
-            />
-          </div>
-          {error && (
-            <div style={{ fontSize: '0.72rem', color: 'var(--danger)', marginTop: '0.4rem' }}>
-              {error}
+      {/* Display / edit area */}
+      <div style={{ padding: '10px 12px' }}>
+        {!editing && (
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
+            <div style={{ fontSize: 20, fontWeight: 600, color: isInit ? 'var(--positive)' : 'var(--text-dim)' }}>
+              {isInit ? fmt(data!.amount) : '—'}
             </div>
-          )}
-        </div>
-      )}
-
-      {lastDeducted && !editing && (
-        <div style={{ padding: '0.6rem 1.25rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--accent2)' }}>
-            Initial setup complete — deducted {fmt(lastDeducted)} for existing positions. Stored balance: {fmt(data!.amount)}
+            {data?.last_updated && isInit && (
+              <div style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Updated {new Date(data.last_updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+
+        {editing && (
+          <div>
+            <div style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+              {isInit ? 'Enter new balance (MXN)' : 'Enter total cash before buying positions — existing holdings deducted automatically'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase' }}>MXN</span>
+              <input
+                className="form-input"
+                style={{ width: 200 }}
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') cancelEdit(); }}
+                placeholder="e.g. 50000"
+                autoFocus
+              />
+            </div>
+            {error && <div style={{ fontSize: 10, color: 'var(--negative)', marginTop: 4, textTransform: 'uppercase' }}>{error}</div>}
+          </div>
+        )}
+
+        {lastDeducted && !editing && (
+          <div style={{ fontSize: 10, color: 'var(--positive)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            INIT COMPLETE — DEDUCTED {fmt(lastDeducted)} FOR OPEN POSITIONS. STORED: {fmt(data!.amount)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

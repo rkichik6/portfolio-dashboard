@@ -25,20 +25,13 @@ export default function EditHoldingModal({ holding, onClose, onSaved }: EditHold
       const res = await fetch('/api/holdings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: holding.id,
-          shares: parseFloat(shares),
-          entry_price_mxn: parseFloat(entryPrice),
-          bucket,
-          conviction,
-          thesis: thesis || null,
-        }),
+        body: JSON.stringify({ id: holding.id, shares: parseFloat(shares), entry_price_mxn: parseFloat(entryPrice), bucket, conviction, thesis: thesis || null }),
       });
       if (!res.ok) throw new Error('Failed');
       onSaved();
       onClose();
     } catch {
-      setError('Failed to update holding.');
+      setError('FAILED TO UPDATE HOLDING.');
     } finally {
       setSaving(false);
     }
@@ -48,12 +41,12 @@ export default function EditHoldingModal({ holding, onClose, onSaved }: EditHold
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 style={{ fontSize: '0.875rem', fontWeight: 600 }}>Edit <span style={{ fontFamily: 'var(--font-mono)' }}>{holding.ticker}</span></h3>
-          <button className="btn" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}><X size={14} /></button>
+          <h3>EDIT {holding.ticker}</h3>
+          <button className="btn" style={{ padding: '2px 6px', borderColor: 'var(--border2)' }} onClick={onClose}><X size={12} /></button>
         </div>
         <div className="modal-body">
-          {error && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.75rem' }}>{error}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+          {error && <div style={{ color: 'var(--negative)', fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>{error}</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
             <div className="form-group">
               <label className="form-label">Shares</label>
               <input className="form-input" type="number" value={shares} onChange={e => setShares(e.target.value)} />
@@ -85,9 +78,9 @@ export default function EditHoldingModal({ holding, onClose, onSaved }: EditHold
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn" onClick={onClose}>CANCEL</button>
           <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'SAVING...' : 'SAVE CHANGES'}
           </button>
         </div>
       </div>

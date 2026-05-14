@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import TickerSearch from '@/components/shared/TickerSearch';
 
 interface Tag {
   id: number;
@@ -61,15 +62,18 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
         </div>
         <div className="modal-body">
           {error && <div style={{ color: 'var(--negative)', fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>{error}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
-            <div className="form-group">
-              <label className="form-label">Ticker</label>
-              <input className="form-input" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} placeholder="TSM" />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Company Name</label>
-              <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="TSMC" />
-            </div>
+          <div className="form-group">
+            <label className="form-label">Ticker</label>
+            <TickerSearch
+              defaultValue={initial?.ticker}
+              placeholder="Search ticker or type symbol..."
+              onSelect={(t, n) => { setTicker(t); setName(prev => prev || n); }}
+              onChange={setTicker}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Company Name</label>
+            <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="Auto-filled on selection" />
           </div>
           <div className="form-group">
             <label className="form-label">Target Price MXN (optional)</label>

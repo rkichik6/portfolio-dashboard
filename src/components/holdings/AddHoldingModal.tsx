@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import TickerSearch from '@/components/shared/TickerSearch';
 
 interface AddHoldingModalProps {
   onClose: () => void;
@@ -26,15 +27,6 @@ export default function AddHoldingModal({ onClose, onSaved, initial }: AddHoldin
   const [thesis, setThesis] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  async function fetchName() {
-    if (!ticker || name) return;
-    try {
-      const res = await fetch(`/api/prices?tickers=${ticker.toUpperCase()}`);
-      const data = await res.json();
-      if (data[ticker.toUpperCase()]?.name) setName(data[ticker.toUpperCase()].name);
-    } catch { /* ignore */ }
-  }
 
   async function handleSave() {
     if (!ticker || !name || !shares || !entryPrice || !entryDate) {
@@ -69,15 +61,20 @@ export default function AddHoldingModal({ onClose, onSaved, initial }: AddHoldin
         </div>
         <div className="modal-body">
           {error && <div style={{ color: 'var(--negative)', fontSize: 11, marginBottom: 8, textTransform: 'uppercase' }}>{error}</div>}
+          <div className="form-group">
+            <label className="form-label">Ticker</label>
+            <TickerSearch
+              defaultValue={initial?.ticker}
+              placeholder="Search ticker or type symbol..."
+              onSelect={(t, n) => { setTicker(t); setName(prev => prev || n); }}
+              onChange={setTicker}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Company Name</label>
+            <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="Auto-filled on selection" />
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
-            <div className="form-group">
-              <label className="form-label">Ticker</label>
-              <input className="form-input" value={ticker} onChange={e => setTicker(e.target.value.toUpperCase())} onBlur={fetchName} placeholder="PLTR" />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Company Name</label>
-              <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="Auto-fetched on blur" />
-            </div>
             <div className="form-group">
               <label className="form-label">Shares</label>
               <input className="form-input" type="number" value={shares} onChange={e => setShares(e.target.value)} placeholder="10" />

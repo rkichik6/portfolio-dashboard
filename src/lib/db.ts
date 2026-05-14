@@ -83,11 +83,18 @@ function initSchema() {
     CREATE TABLE IF NOT EXISTS cash_balance (
       id INTEGER PRIMARY KEY CHECK(id = 1),
       amount REAL NOT NULL DEFAULT 0,
+      initialized INTEGER NOT NULL DEFAULT 0,
       last_updated TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
-    INSERT OR IGNORE INTO cash_balance (id, amount) VALUES (1, 0);
+    INSERT OR IGNORE INTO cash_balance (id, amount, initialized) VALUES (1, 0, 0);
   `);
+
+  // Migration: add initialized column if it was created before this version
+  const cols = db.prepare('PRAGMA table_info(cash_balance)').all() as { name: string }[];
+  if (!cols.some(c => c.name === 'initialized')) {
+    db.exec('ALTER TABLE cash_balance ADD COLUMN initialized INTEGER NOT NULL DEFAULT 0');
+  }
 
   seedData();
 }

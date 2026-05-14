@@ -41,6 +41,7 @@ export default function SellModal({ holding, onClose, onSold }: SellModalProps) 
         }),
       });
       if (!res.ok) throw new Error('Failed');
+      window.dispatchEvent(new Event('cash-update'));
       onSold();
       onClose();
     } catch {

@@ -62,16 +62,25 @@ export async function POST(req: NextRequest) {
     };
 
     const { ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis } = body;
+    const cost = shares * entry_price_mxn;
 
-    db.prepare(`
-      INSERT INTO holdings (ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-    `).run(ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis ?? null);
+    db.transaction(() => {
+      db.prepare(`
+        INSERT INTO holdings (ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).run(ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis ?? null);
 
-    db.prepare(`
-      INSERT INTO trade_log (ticker, name, action, shares, price_mxn, total_mxn, date, notes)
-      VALUES (?, ?, 'BUY', ?, ?, ?, ?, ?)
-    `).run(ticker, name, shares, entry_price_mxn, shares * entry_price_mxn, entry_date, 'New position added');
+      db.prepare(`
+        INSERT INTO trade_log (ticker, name, action, shares, price_mxn, total_mxn, date, notes)
+        VALUES (?, ?, 'BUY', ?, ?, ?, ?, ?)
+      `).run(ticker, name, shares, entry_price_mxn, cost, entry_date, 'New position added');
+
+      // Deduct cost from cash (only if cash has been initialized)
+      db.prepare(`
+        UPDATE cash_balance SET amount = amount - ?, last_updated = datetime('now')
+        WHERE id = 1 AND initialized = 1
+      `).run(cost);
+    })();
 
     return NextResponse.json({ success: true });
   } catch (err) {

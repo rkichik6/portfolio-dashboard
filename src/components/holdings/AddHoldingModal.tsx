@@ -63,6 +63,7 @@ export default function AddHoldingModal({ onClose, onSaved, initial }: AddHoldin
         }),
       });
       if (!res.ok) throw new Error('Failed');
+      window.dispatchEvent(new Event('cash-update'));
       onSaved();
       onClose();
     } catch {

@@ -38,7 +38,7 @@ export async function PUT(req: NextRequest) {
     let storedAmount = amount;
     let holdingsCost = 0;
 
-    if (!current.initialized) {
+    if (!current?.initialized) {
       // First-time setup: subtract cost of all existing open positions
       const holdings = db.prepare('SELECT shares, entry_price_mxn FROM holdings').all() as HoldingRow[];
       holdingsCost = holdings.reduce((sum, h) => sum + h.shares * h.entry_price_mxn, 0);

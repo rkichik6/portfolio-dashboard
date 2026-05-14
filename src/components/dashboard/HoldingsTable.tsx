@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Edit2, TrendingDown } from 'lucide-react';
 import ConvictionBadge from '@/components/shared/ConvictionBadge';
 import PriceChange from '@/components/shared/PriceChange';
@@ -45,11 +45,29 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [sortCol, setSortCol] = useState<SortCol>('total_value_mxn');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [descriptions, setDescriptions] = useState<Record<string, string | null>>({});
+  const fetchedRef = useRef<Set<string>>(new Set());
+
+  async function fetchDescription(ticker: string) {
+    if (fetchedRef.current.has(ticker)) return;
+    fetchedRef.current.add(ticker);
+    try {
+      const res = await fetch(`/api/profile?symbol=${encodeURIComponent(ticker)}`);
+      const data = await res.json() as { description: string | null };
+      if (data.description) setDescriptions(prev => ({ ...prev, [ticker]: data.description }));
+    } catch { /* fail silently */ }
+  }
 
   function toggle(id: number) {
     setExpanded(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+        const h = holdings.find(h => h.id === id);
+        if (h) fetchDescription(h.ticker);
+      }
       return next;
     });
   }
@@ -183,6 +201,12 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
                             ))}
                           </div>
                         </div>
+                        {descriptions[h.ticker] && (
+                          <div style={{ marginTop: 10, borderTop: '1px solid #1a1a1a', paddingTop: 10 }}>
+                            <div style={{ fontSize: 9, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>ABOUT</div>
+                            <div style={{ fontSize: 12, color: '#888888', lineHeight: 1.6, fontFamily: 'var(--font-mono)' }}>{descriptions[h.ticker]}</div>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )}

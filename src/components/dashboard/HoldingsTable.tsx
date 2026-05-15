@@ -59,17 +59,14 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
   }
 
   function toggle(id: number) {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-        const h = holdings.find(h => h.id === id);
-        if (h) fetchDescription(h.ticker);
-      }
-      return next;
-    });
+    const opening = !expanded.has(id);
+    const next = new Set(expanded);
+    opening ? next.add(id) : next.delete(id);
+    setExpanded(next);
+    if (opening) {
+      const h = holdings.find(h => h.id === id);
+      if (h) fetchDescription(h.ticker);
+    }
   }
 
   function handleSort(col: SortCol) {
@@ -204,7 +201,18 @@ export default function HoldingsTable({ holdings, onEdit, onSell }: HoldingsTabl
                         {descriptions[h.ticker] && (
                           <div style={{ marginTop: 10, borderTop: '1px solid #1a1a1a', paddingTop: 10 }}>
                             <div style={{ fontSize: 9, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>ABOUT</div>
-                            <div style={{ fontSize: 12, color: '#888888', lineHeight: 1.6, fontFamily: 'var(--font-mono)' }}>{descriptions[h.ticker]}</div>
+                            <div style={{
+                              fontSize: 12,
+                              color: '#888888',
+                              lineHeight: 1.6,
+                              fontFamily: 'var(--font-mono)',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}>
+                              {descriptions[h.ticker]}
+                            </div>
                           </div>
                         )}
                       </td>

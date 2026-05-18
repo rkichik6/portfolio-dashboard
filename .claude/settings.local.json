@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Recurse -Name -Path \"C:\\\\Users\\\\rkc65\\\\Documents\\\\portfolio-dashboard\" | Where-Object { $_ -notmatch \"node_modules|\\\\.next|\\\\.git\" } | Sort-Object)",
+      "PowerShell(Remove-Item *)"
+    ]
+  }
+}

@@ -4,9 +4,10 @@ import { Plus, ArrowRight, Trash2 } from 'lucide-react';
 import { WatchlistItem } from '@/components/watchlist/WatchlistCard';
 import { formatMxn } from '@/lib/calculations';
 import AddWatchlistModal from '@/components/watchlist/AddWatchlistModal';
-import AddHoldingModal from '@/components/holdings/AddHoldingModal';
+import BuyModal from '@/components/holdings/BuyModal';
 import TagManager from '@/components/watchlist/TagManager';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import { usePortfolio } from '@/context/PortfolioContext';
 
 interface Tag {
   id: number;
@@ -15,6 +16,7 @@ interface Tag {
 }
 
 export default function WatchlistPage() {
+  const { activePortfolioId } = usePortfolio();
   const [items, setItems] = useState<WatchlistItem[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function WatchlistPage() {
 
   const load = useCallback(async () => {
     try {
-      const [wlRes, tagsRes] = await Promise.all([fetch('/api/watchlist'), fetch('/api/tags')]);
+      const [wlRes, tagsRes] = await Promise.all([fetch(`/api/watchlist?portfolio_id=${activePortfolioId}`), fetch('/api/tags')]);
       const [wl, tags] = await Promise.all([wlRes.json() as Promise<WatchlistItem[]>, tagsRes.json() as Promise<Tag[]>]);
       setItems(Array.isArray(wl) ? wl : []);
       setAllTags(Array.isArray(tags) ? tags : []);
@@ -46,7 +48,7 @@ export default function WatchlistPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activePortfolioId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -193,12 +195,14 @@ export default function WatchlistPage() {
 
       <TagManager />
 
-      {showAdd && <AddWatchlistModal onClose={() => setShowAdd(false)} onSaved={load} />}
+      {showAdd && <AddWatchlistModal portfolioId={activePortfolioId} onClose={() => setShowAdd(false)} onSaved={load} />}
       {moveTarget && (
-        <AddHoldingModal
+        <BuyModal
+          holdings={[]}
+          portfolioId={activePortfolioId}
           onClose={() => setMoveTarget(null)}
           onSaved={() => { setMoveTarget(null); load(); }}
-          initial={{ ticker: moveTarget.ticker, name: moveTarget.name, entry_price_mxn: moveTarget.current_price_mxn ?? moveTarget.target_price_mxn ?? undefined }}
+          initial={{ ticker: moveTarget.ticker, name: moveTarget.name, price_mxn: moveTarget.current_price_mxn ?? moveTarget.target_price_mxn ?? undefined }}
         />
       )}
       {deleteTarget !== null && (

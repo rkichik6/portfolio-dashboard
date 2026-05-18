@@ -10,12 +10,13 @@ interface Tag {
 }
 
 interface AddWatchlistModalProps {
+  portfolioId: number;
   onClose: () => void;
   onSaved: () => void;
   initial?: Partial<{ ticker: string; name: string; target_price_mxn: number }>;
 }
 
-export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatchlistModalProps) {
+export default function AddWatchlistModal({ portfolioId, onClose, onSaved, initial }: AddWatchlistModalProps) {
   const [ticker, setTicker] = useState(initial?.ticker ?? '');
   const [name, setName] = useState(initial?.name ?? '');
   const [targetPrice, setTargetPrice] = useState(initial?.target_price_mxn?.toString() ?? '');
@@ -41,9 +42,15 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
       const res = await fetch('/api/watchlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticker: ticker.toUpperCase(), name, target_price_mxn: targetPrice ? parseFloat(targetPrice) : null, notes: notes || null, tag_ids: selectedTags }),
+        body: JSON.stringify({ portfolio_id: portfolioId, ticker: ticker.toUpperCase(), name, target_price_mxn: targetPrice ? parseFloat(targetPrice) : null, notes: notes || null, tag_ids: selectedTags }),
       });
       if (!res.ok) throw new Error('Failed');
+      // Generate description in background — don't await
+      fetch('/api/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticker: ticker.toUpperCase(), name }),
+      }).catch(() => {});
       onSaved();
       onClose();
     } catch {
@@ -67,7 +74,7 @@ export default function AddWatchlistModal({ onClose, onSaved, initial }: AddWatc
             <TickerSearch
               defaultValue={initial?.ticker}
               placeholder="Search ticker or type symbol..."
-              onSelect={(t, n) => { setTicker(t); setName(prev => prev || n); }}
+              onSelect={(t, n, price) => { setTicker(t); setName(prev => prev || n); if (price) setTargetPrice(price.toFixed(2)); }}
               onChange={setTicker}
             />
           </div>

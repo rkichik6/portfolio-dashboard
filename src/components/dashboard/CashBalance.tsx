@@ -9,10 +9,11 @@ interface CashData {
 }
 
 interface CashBalanceProps {
+  portfolioId: number;
   onBalanceChange?: (amount: number) => void;
 }
 
-export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
+export default function CashBalance({ portfolioId, onBalanceChange }: CashBalanceProps) {
   const [data, setData] = useState<CashData | null>(null);
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -22,12 +23,12 @@ export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch('/api/cash');
+      const res = await fetch(`/api/cash?portfolio_id=${portfolioId}`);
       const json = await res.json() as CashData;
       setData(json);
       onBalanceChange?.(json.amount);
     } catch { /* ignore */ }
-  }, [onBalanceChange]);
+  }, [portfolioId, onBalanceChange]);
 
   useEffect(() => {
     load();
@@ -58,7 +59,7 @@ export default function CashBalance({ onBalanceChange }: CashBalanceProps) {
     setSaving(true);
     setError('');
     try {
-      const res = await fetch('/api/cash', {
+      const res = await fetch(`/api/cash?portfolio_id=${portfolioId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: parsed }),

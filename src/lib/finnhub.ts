@@ -53,7 +53,7 @@ export async function fetchBatchQuotes(
     const ticker = tickers[i];
     results[ticker] = await fetchQuote(ticker);
     if (onProgress) onProgress(ticker);
-    if (i < tickers.length - 1) await sleep(100);
+    if (i < tickers.length - 1) await sleep(200);
   }
   return results;
 }

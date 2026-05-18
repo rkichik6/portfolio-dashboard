@@ -1,9 +1,12 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import getDb from '@/lib/db';
 import { getPrices } from '@/lib/prices';
 
 interface WatchlistRow {
   id: number;
+  portfolio_id: number;
   ticker: string;
   name: string;
   target_price_mxn: number | null;
@@ -17,10 +20,11 @@ interface TagRow {
   color: string;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const db = getDb();
-    const items = db.prepare('SELECT * FROM watchlist ORDER BY ticker').all() as WatchlistRow[];
+    const portfolioId = parseInt(req.nextUrl.searchParams.get('portfolio_id') ?? '1') || 1;
+    const items = db.prepare('SELECT * FROM watchlist WHERE portfolio_id = ? ORDER BY ticker').all(portfolioId) as WatchlistRow[];
     const tickers = items.map(i => i.ticker);
     const prices = tickers.length > 0 ? await getPrices(tickers) : {};
 
@@ -51,6 +55,7 @@ export async function POST(req: NextRequest) {
   try {
     const db = getDb();
     const body = await req.json() as {
+      portfolio_id?: number;
       ticker: string;
       name: string;
       target_price_mxn?: number;
@@ -58,12 +63,13 @@ export async function POST(req: NextRequest) {
       tag_ids?: number[];
     };
 
-    const { ticker, name, target_price_mxn, notes, tag_ids } = body;
+    const { portfolio_id, ticker, name, target_price_mxn, notes, tag_ids } = body;
+    const portfolioId = portfolio_id ?? 1;
 
     const result = db.prepare(`
-      INSERT INTO watchlist (ticker, name, target_price_mxn, notes)
-      VALUES (?, ?, ?, ?)
-    `).run(ticker, name, target_price_mxn ?? null, notes ?? null);
+      INSERT INTO watchlist (portfolio_id, ticker, name, target_price_mxn, notes)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(portfolioId, ticker, name, target_price_mxn ?? null, notes ?? null);
 
     const watchlistId = result.lastInsertRowid;
     if (tag_ids?.length) {

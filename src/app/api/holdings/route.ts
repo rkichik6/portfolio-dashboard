@@ -1,10 +1,14 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import getDb from '@/lib/db';
-import { getPrices } from '@/lib/prices';
+import { getFxRate } from '@/lib/prices';
+import { fetchBatchQuotes } from '@/lib/finnhub';
 import { getPnlPct, getPnlMxn, getStopLossPrice } from '@/lib/calculations';
 
 interface HoldingRow {
   id: number;
+  portfolio_id: number;
   ticker: string;
   name: string;
   shares: number;
@@ -17,15 +21,50 @@ interface HoldingRow {
   updated_at: string;
 }
 
-export async function GET() {
+interface CachedPrice {
+  price_usd: number;
+  price_mxn: number;
+  change_pct: number;
+}
+
+export async function GET(req: NextRequest) {
   try {
     const db = getDb();
-    const holdings = db.prepare('SELECT * FROM holdings ORDER BY bucket, ticker').all() as HoldingRow[];
+    const portfolioId = parseInt(req.nextUrl.searchParams.get('portfolio_id') ?? '1') || 1;
+    const holdings = db.prepare(
+      'SELECT * FROM holdings WHERE portfolio_id = ? ORDER BY bucket, ticker'
+    ).all(portfolioId) as HoldingRow[];
     const tickers = holdings.map(h => h.ticker);
-    const prices = tickers.length > 0 ? await getPrices(tickers) : {};
+
+    if (tickers.length === 0) return NextResponse.json([]);
+
+    const fxRate = await getFxRate();
+    const quotes = await fetchBatchQuotes(tickers);
+
+    const priceMap: Record<string, CachedPrice & { stale?: boolean }> = {};
+
+    for (const ticker of tickers) {
+      const q = quotes[ticker];
+      if (q && q.c > 0) {
+        const price_mxn = q.c * fxRate;
+        db.prepare(`
+          INSERT OR REPLACE INTO price_cache (ticker, price_usd, price_mxn, change_pct, updated_at)
+          VALUES (?, ?, ?, ?, datetime('now'))
+        `).run(ticker, q.c, price_mxn, q.dp ?? 0);
+        priceMap[ticker] = { price_usd: q.c, price_mxn, change_pct: q.dp ?? 0 };
+      } else {
+        const cached = db.prepare(
+          'SELECT price_usd, price_mxn, change_pct FROM price_cache WHERE ticker = ?'
+        ).get(ticker) as CachedPrice | undefined;
+        if (cached) {
+          console.warn(`[holdings] ${ticker}: live price unavailable, using cached fallback`);
+          priceMap[ticker] = { ...cached, stale: true };
+        }
+      }
+    }
 
     const enriched = holdings.map(h => {
-      const price = prices[h.ticker];
+      const price = priceMap[h.ticker];
       const currentPrice = price?.price_mxn ?? h.entry_price_mxn;
       const conviction = h.conviction as 'very-high' | 'high' | 'medium' | 'speculative';
       return {
@@ -36,7 +75,7 @@ export async function GET() {
         pnl_mxn: getPnlMxn(h.entry_price_mxn, currentPrice, h.shares),
         total_value_mxn: currentPrice * h.shares,
         stop_loss_price: getStopLossPrice(h.entry_price_mxn, conviction),
-        price_stale: price?.stale ?? false,
+        price_stale: price?.stale ?? !price,
       };
     });
 
@@ -51,6 +90,7 @@ export async function POST(req: NextRequest) {
   try {
     const db = getDb();
     const body = await req.json() as {
+      portfolio_id?: number;
       ticker: string;
       name: string;
       shares: number;
@@ -61,25 +101,25 @@ export async function POST(req: NextRequest) {
       thesis?: string;
     };
 
+    const portfolioId = body.portfolio_id ?? 1;
     const { ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis } = body;
     const cost = shares * entry_price_mxn;
 
     db.transaction(() => {
       db.prepare(`
-        INSERT INTO holdings (ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-      `).run(ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis ?? null);
+        INSERT INTO holdings (portfolio_id, ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).run(portfolioId, ticker, name, shares, entry_price_mxn, entry_date, bucket, conviction, thesis ?? null);
 
       db.prepare(`
-        INSERT INTO trade_log (ticker, name, action, shares, price_mxn, total_mxn, date, notes)
-        VALUES (?, ?, 'BUY', ?, ?, ?, ?, ?)
-      `).run(ticker, name, shares, entry_price_mxn, cost, entry_date, 'New position added');
+        INSERT INTO trade_log (portfolio_id, ticker, name, action, shares, price_mxn, total_mxn, date, notes)
+        VALUES (?, ?, ?, 'BUY', ?, ?, ?, ?, ?)
+      `).run(portfolioId, ticker, name, shares, entry_price_mxn, cost, entry_date, 'New position added');
 
-      // Deduct cost from cash (only if cash has been initialized)
       db.prepare(`
         UPDATE cash_balance SET amount = amount - ?, last_updated = datetime('now')
-        WHERE id = 1 AND initialized = 1
-      `).run(cost);
+        WHERE portfolio_id = ? AND initialized = 1
+      `).run(cost, portfolioId);
     })();
 
     return NextResponse.json({ success: true });
@@ -102,9 +142,7 @@ export async function PUT(req: NextRequest) {
     };
 
     const { id, ...updates } = body;
-    const fields = Object.keys(updates)
-      .map(k => `${k} = ?`)
-      .join(', ');
+    const fields = Object.keys(updates).map(k => `${k} = ?`).join(', ');
     const values = [...Object.values(updates), id];
 
     db.prepare(`UPDATE holdings SET ${fields}, updated_at = datetime('now') WHERE id = ?`).run(...values);
@@ -134,17 +172,17 @@ export async function DELETE(req: NextRequest) {
 
     db.transaction(() => {
       db.prepare(`
-        INSERT INTO trade_log (ticker, name, action, shares, price_mxn, total_mxn, date, notes, realized_pnl_mxn)
-        VALUES (?, ?, 'SELL', ?, ?, ?, ?, ?, ?)
+        INSERT INTO trade_log (portfolio_id, ticker, name, action, shares, price_mxn, total_mxn, date, notes, realized_pnl_mxn)
+        VALUES (?, ?, ?, 'SELL', ?, ?, ?, ?, ?, ?)
       `).run(
-        holding.ticker, holding.name, holding.shares,
-        sell_price_mxn, proceeds,
-        sell_date, notes ?? null, realized_pnl
+        holding.portfolio_id, holding.ticker, holding.name, holding.shares,
+        sell_price_mxn, proceeds, sell_date, notes ?? null, realized_pnl
       );
       db.prepare('DELETE FROM holdings WHERE id = ?').run(id);
       db.prepare(`
-        UPDATE cash_balance SET amount = amount + ?, last_updated = datetime('now') WHERE id = 1
-      `).run(proceeds);
+        UPDATE cash_balance SET amount = amount + ?, last_updated = datetime('now')
+        WHERE portfolio_id = ?
+      `).run(proceeds, holding.portfolio_id);
     })();
 
     return NextResponse.json({ success: true, realized_pnl, proceeds });

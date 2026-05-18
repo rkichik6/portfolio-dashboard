@@ -10,7 +10,7 @@ interface SearchResult {
 
 interface TickerSearchProps {
   defaultValue?: string;
-  onSelect: (ticker: string, name: string) => void;
+  onSelect: (ticker: string, name: string, priceMxn?: number) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
 }
@@ -23,27 +23,13 @@ export default function TickerSearch({
 }: TickerSearchProps) {
   const [query, setQuery] = useState(defaultValue.toUpperCase());
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [prices, setPrices] = useState<Record<string, number | null>>({});
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(!!defaultValue);
+  const [refreshing, setRefreshing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshAbortRef = useRef(false);
 
-  async function fetchPrices(symbols: string[]) {
-    if (symbols.length === 0) return;
-    try {
-      const res = await fetch(`/api/prices?tickers=${symbols.join(',')}`);
-      const data = await res.json() as Record<string, { price_usd: number }>;
-      const map: Record<string, number | null> = {};
-      for (const sym of symbols) {
-        const usd = data[sym]?.price_usd;
-        map[sym] = usd && usd > 0 ? usd : null;
-      }
-      setPrices(map);
-    } catch { /* stay at {} — all rows show "--" */ }
-  }
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     function onDown(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -64,7 +50,6 @@ export default function TickerSearch({
 
     if (val.length < 2) {
       setResults([]);
-      setPrices({});
       setOpen(false);
       return;
     }
@@ -75,25 +60,56 @@ export default function TickerSearch({
         const data = await res.json() as { results: SearchResult[] };
         const list = data.results ?? [];
         setResults(list);
-        setPrices({});
         setOpen(list.length > 0);
-        if (list.length > 0) fetchPrices(list.map(r => r.displaySymbol));
       } catch {
         setResults([]);
-        setPrices({});
         setOpen(false);
       }
     }, 300);
   }
 
-  function handleSelect(r: SearchResult) {
+  async function handleSelect(r: SearchResult) {
     const ticker = r.displaySymbol;
     setQuery(ticker);
     setSelected(true);
     setOpen(false);
     setResults([]);
-    onSelect(ticker, r.description);
     onChange?.(ticker);
+
+    // Fetch opening price for the selected ticker — one single call
+    let priceMxn: number | undefined;
+    try {
+      const res = await fetch(`/api/price-snapshot?ticker=${encodeURIComponent(ticker)}`);
+      const data = await res.json() as { price_mxn: number | null };
+      priceMxn = data.price_mxn ?? undefined;
+    } catch { /* leave priceMxn undefined — form stays empty */ }
+
+    onSelect(ticker, r.description, priceMxn);
+  }
+
+  async function handleRefresh(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (refreshing) return;
+
+    refreshAbortRef.current = false;
+    setRefreshing(true);
+
+    try {
+      const res = await fetch('/api/price-snapshot?list=1');
+      const data = await res.json() as { tickers: string[] };
+      const tickers = data.tickers ?? [];
+
+      for (let i = 0; i < tickers.length; i++) {
+        if (refreshAbortRef.current) break;
+        await fetch(`/api/price-snapshot?ticker=${encodeURIComponent(tickers[i])}&refresh=1`);
+        if (i < tickers.length - 1) {
+          await new Promise<void>(r => setTimeout(r, 300));
+        }
+      }
+    } catch { /* silent */ }
+
+    setRefreshing(false);
   }
 
   const typeLabel = (type: string) =>
@@ -124,7 +140,7 @@ export default function TickerSearch({
           background: '#0d0d0d',
           border: '1px solid #222222',
           zIndex: 300,
-          maxHeight: 216,
+          maxHeight: 232,
           overflowY: 'auto',
         }}>
           {results.map(r => (
@@ -144,13 +160,31 @@ export default function TickerSearch({
               <span style={{ fontSize: 11, color: '#888888', flexShrink: 0, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
                 {typeLabel(r.type)}
               </span>
-              <span style={{ fontSize: 12, color: '#e0e0e0', flexShrink: 0, fontFamily: 'var(--font-mono)', minWidth: 56, textAlign: 'right' }}>
-                {r.displaySymbol in prices
-                  ? (prices[r.displaySymbol] != null ? `$${prices[r.displaySymbol]!.toFixed(2)}` : '--')
-                  : '--'}
-              </span>
             </div>
           ))}
+          <div style={{
+            borderTop: '1px solid #1a1a1a',
+            padding: '4px 12px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}>
+            <button
+              onMouseDown={handleRefresh}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: refreshing ? '#444444' : '#555555',
+                fontSize: 10,
+                fontFamily: 'var(--font-mono)',
+                cursor: refreshing ? 'default' : 'pointer',
+                padding: '2px 0',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              {refreshing ? 'REFRESHING...' : '↺ REFRESH PRICES'}
+            </button>
+          </div>
         </div>
       )}
     </div>

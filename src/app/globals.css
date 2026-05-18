@@ -116,6 +116,12 @@ h1, h2, h3, h4, h5, h6 {
 .btn-success { border-color: var(--positive); color: var(--positive); background: var(--bg); }
 .btn-success:hover { background: rgba(0,200,83,0.08); }
 
+.btn-buy { border-color: var(--accent); color: var(--accent); background: var(--bg); }
+.btn-buy:hover { background: var(--accent-bg); }
+
+.btn-sell { border-color: #888888; color: #888888; background: var(--bg); }
+.btn-sell:hover { background: #111111; }
+
 /* ─── Tables ────────────────────────────────────────────── */
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th {
@@ -247,4 +253,12 @@ h1, h2, h3, h4, h5, h6 {
   .data-table { font-size: 11px; }
   .data-table td, .data-table th { padding: 0 5px; }
   .modal { max-width: 100%; }
+}
+
+@keyframes signal-pulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.6; }
+}
+.signal-pulse {
+  animation: signal-pulse 1.4s ease-in-out infinite;
 }
